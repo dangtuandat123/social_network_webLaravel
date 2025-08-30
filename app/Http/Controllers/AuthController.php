@@ -39,34 +39,55 @@ class AuthController extends Controller
     }
 
     public function register(Request $request)
-{
-    $validatedData = $request->validate([
-        'name' => 'required|max:255',
-        'email' => 'required|email|unique:users,email',
-        'password' => 'required|min:8|confirmed',
-        'gender' => 'required|in:male,female', 
-    ], [
-        'email.unique' => 'Email đã được sử dụng.',
-        'password.confirmed' => 'Xác nhận mật khẩu không khớp.',
-        'gender.required' => 'Giới tính là bắt buộc.',
-        'gender.in' => 'Giới tính không hợp lệ.',
-    ]);
+    {
+        $validatedData = $request->validate([
+            'name' => 'required|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|min:8|confirmed',
+            'gender' => 'required|in:male,female',
+        ], [
+            'email.unique' => 'Email đã được sử dụng.',
+            'password.confirmed' => 'Xác nhận mật khẩu không khớp.',
+            'gender.required' => 'Giới tính là bắt buộc.',
+            'gender.in' => 'Giới tính không hợp lệ.',
+        ]);
 
-    $user = User::create([
-        'name' => $validatedData['name'],
-        'email' => $validatedData['email'],
-        'password' => Hash::make($validatedData['password']),
-        'gender' => $validatedData['gender'], 
-    ]);
-    Auth::login($user);
+        $user = User::create([
+            'name' => $validatedData['name'],
+            'email' => $validatedData['email'],
+            'password' => Hash::make($validatedData['password']),
+            'gender' => $validatedData['gender'],
+        ]);
+        Auth::login($user);
 
-    // tao feed 
-    $categorys = Post::select('category')->distinct()->pluck('category'); 
-    foreach ($categorys as $category ) {
-        $posts = Post::where('category', $category)->get();
-        $post_random = $posts->shuffle()->take(ceil($posts->count() / 3));
-        
-        foreach ($post_random as $post) {
+        $final_post = [];
+        $random_numbers = [3, 5, 7];
+
+        $index_random_number = 0;
+
+        // tao feed 
+        $categorys = Post::select('category')->distinct()->pluck('category');
+        foreach ($categorys as $category) {
+            $posts = Post::where('category', $category)->get();
+            $post_random = $posts->shuffle()->take(round($posts->count() / 3));
+
+            $random_number = $random_numbers[$index_random_number];
+
+            foreach ($post_random as $post) {
+                for ($i = 0; $i < $random_number; $i++) {
+                    $final_post[] = $post;
+                }
+            }
+            $index_random_number = $index_random_number +1;
+        }
+        shuffle($final_post);
+        shuffle($final_post);
+
+
+
+
+        // die(json_encode($final_post));
+        foreach ($final_post as $post) {
             Feed::create([
                 'user_id' => Auth::id(),
                 'post_id' => $post->id,
@@ -74,10 +95,8 @@ class AuthController extends Controller
             ]);
         }
 
+        return redirect('/home');
     }
-
-    return redirect('/home');
-}
 
     public function logout(Request $request)
     {
