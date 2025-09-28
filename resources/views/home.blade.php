@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('content')
-    <div id="content-page" class="content-page">
+    <div id="content-page" class="content-page" style="padding: 1rem 0px 0px 0px;">
         <div class="container">
             <div class="row">
                 <div class="col-12 row m-0 p-0 justify-content-center">
@@ -167,12 +167,12 @@
                         </div>
                     @endif
                     @foreach ($posts as $post)
-                        <div class="col-sm-9 post_container_duration" data-post-id="{{ $post->id}}">
+                        <div class="col-sm-9 post_container_duration" data-post-id="{{ $post->feed_id }}">
                             <div class="card card-block card-stretch card-height">
-                                <div class="card-body">
+                                <div class="card-body" style="padding:0.5rem 0.5rem">
                                     <div class="user-post-data">
                                         <div class="d-flex justify-content-between">
-                                            <div class="me-3">
+                                            <div class="me-3" style="margin-right: 0.6rem !important;">
                                                 <img class="rounded-circle img-fluid"
                                                     src="{{ asset('template_assets/images/user/01.jpg') }}"
                                                     alt="" />
@@ -186,9 +186,9 @@
 
                                                         </p>
                                                     </div>
-                                                    <div class="card-post-toolbar">
+                                                    <div class="card-post-toolbar" >
                                                         <b>
-                                                            <h5 class="mb-0 text-primary">Danh mục: <span
+                                                            <h5 class="mb-0 text-primary"  style="font-size: 0.8rem">Danh mục: <span
                                                                     style="color: red">{{ $post->category }}</span></h5>
                                                         </b>
 
@@ -222,9 +222,8 @@
                                                     <div class="d-flex align-items-center">
                                                         <div class="like-data">
                                                             <!-- Nút Like -->
-                                                            <button type="button" class="btn btn-info"
+                                                            <button type="button" class="btn btn-info btn-like"
                                                                 style="background-color: white; border: none;"
-                                                                id="like-btn-{{ $post->id }}"
                                                                 data-post-id="{{ $post->id }}">
                                                                 <!-- Hình ảnh Like -->
                                                                 <img src="{{ auth()->user()->hasLiked($post) ? asset('template_assets/images/heart.png') : asset('template_assets/images/heart (1).png') }}"
@@ -246,7 +245,7 @@
                                                     <!-- Nút chia sẻ lên trang cá nhân -->
 
                                                     <a class="btn btn-info" data-bs-toggle="modal"
-                                                        data-bs-target="#Modal_share_{{ $post->id }}">Chia sẽ</a>
+                                                        data-bs-target="#Modal_share_{{ $post->id }}">Chia sẻ</a>
                                                     <div class="modal fade" id="Modal_share_{{ $post->id }}"
                                                         tabindex="-1" aria-labelledby="exampleModalLabel"
                                                         aria-hidden="true" style="display: none;">
@@ -262,11 +261,11 @@
                                                                     </button>
                                                                 </div>
                                                                 <div class="modal-body">
-                                                                    Bạn có muốn chia sẽ bài viết này lên trang cá nhân
+                                                                    Bạn có muốn chia sẻ bài viết này lên trang cá nhân
                                                                     không?
                                                                     <button type="submit" data-bs-dismiss="modal"
                                                                         class="btn btn-primary mb-1 mt-1 btn-share"
-                                                                        data-post-id="{{ $post->id }}">Chia sẽ
+                                                                        data-post-id="{{ $post->id }}">Chia sẻ
                                                                         ngay</button>
 
                                                                 </div>
@@ -309,13 +308,13 @@
                                             </symbol>
                                         </svg>
 
-                                        <div class="alert alert-solid alert-primary d-flex align-items-center mt-3"
+                                        <div class="alert alert-solid alert-primary d-flex align-items-center mt-3" style="padding: 0.5rem"
                                             role="alert">
                                             <svg class="bi flex-shrink-0 me-2" width="24" height="24">
                                                 <use xlink:href="#info-fill"></use>
                                             </svg>
                                             <div>
-                                                Vui lòng đăng nhập để tương tác với bài viết!
+                                                Vui lòng <a style="color: red;" href="{{route('login')}}">Đăng nhập</a> để tương tác với bài viết!
 
                                             </div>
                                         </div>
@@ -326,9 +325,14 @@
                     @endforeach
                     <script>
                         $(document).ready(function() {
+                            $('.btn-like').on('click', function(event) {
+                                event.preventDefault();
+                                const postId = $(this).data('post-id');
 
-                            $('.btn-info').click(function() {
-                                var postId = $(this).data('post-id');
+                                if (!postId) {
+                                    console.warn('Thiếu post_id khi gửi yêu cầu like.');
+                                    return;
+                                }
 
                                 $.ajax({
                                     url: '/like/' + postId,
@@ -337,46 +341,53 @@
                                         _token: '{{ csrf_token() }}',
                                     },
                                     success: function(response) {
+                                        const $likeButtons = $('.btn-like[data-post-id="' + postId + '"]');
+
                                         if (response.status === 'liked') {
-                                            $('#like-btn-' + postId).find('img').attr('src',
-                                                '{{ asset('template_assets/images/heart.png') }}');
+                                            // Chuyển sang icon trái tim đỏ cho tất cả nút cùng bài viết
+                                            $likeButtons.find('img').attr('src', '{{ asset('template_assets/images/heart.png') }}');
                                         } else {
-                                            $('#like-btn-' + postId).find('img').attr('src',
-                                                '{{ asset('template_assets/images/heart (1).png') }}');
+                                            // Hiển thị lại icon trái tim xám
+                                            $likeButtons.find('img').attr('src', '{{ asset('template_assets/images/heart (1).png') }}');
                                         }
-                                        console.log(response);
                                     },
                                     error: function(error) {
-                                        console.log(error);
+                                        console.error('Không thể like bài viết', error);
                                     }
                                 });
                             });
-                            $('.btn-share').click(function() {
-                                let postId = $(this).data('post-id');
+
+                            $('.btn-share').on('click', function(event) {
+                                event.preventDefault();
+                                const postId = $(this).data('post-id');
+
+                                if (!postId) {
+                                    console.warn('Thiếu post_id khi chia sẻ bài viết.');
+                                    return;
+                                }
+
                                 $.ajax({
                                     url: '/share-to-profile/' + postId,
                                     type: 'POST',
                                     data: {
                                         _token: '{{ csrf_token() }}'
                                     },
-                                    success: function(res) {
-                                        alert('Chia sẽ thành công!');
-
+                                    success: function() {
+                                        alert('Chia sẻ thành công!');
                                     },
-                                    error: function(err) {
+                                    error: function() {
                                         alert('Có lỗi xảy ra!');
                                     }
                                 });
                             });
 
+                            // Lưu thời gian bắt đầu xem cho mỗi bài
+                            const postViewStartTimes = {};
 
-
-                            // lưu thời gian bắt đầu xem cho mỗi bài
-                            let postViewStartTimes = {};
-
-                            // gửi duration lên server
+                            // Gửi duration lên server
                             function sendDuration(postId, duration) {
-                                if (duration <= 0) return; // bỏ qua nếu duration = 0
+                                if (duration <= 0) return; // Bỏ qua nếu duration = 0
+
                                 $.ajax({
                                     url: '{{ route('feed.updateDuration') }}',
                                     type: 'POST',
@@ -385,38 +396,39 @@
                                         post_id: postId,
                                         duration: duration
                                     },
-                                    success: function(res) {
+                                    success: function() {
                                         console.log('Bài', postId, 'đã xem', duration, 'giây');
                                     },
-                                    error: function(err) {
+                                    error: function() {
                                         console.error('Lỗi gửi thời gian xem bài', postId);
                                     }
                                 });
                             }
 
-                            // tạo observer
-                            let observer = new IntersectionObserver(function(entries, observer) {
+                            // Tạo observer để theo dõi thời gian xem bài viết
+                            const observer = new IntersectionObserver(function(entries) {
                                 entries.forEach(entry => {
-                                    let $el = $(entry.target);
-                                    let postId = $el.data('post-id');
+                                    const $el = $(entry.target);
+                                    const postId = $el.data('post-id');
+
+                                    if (!postId) {
+                                        return;
+                                    }
 
                                     if (entry.isIntersecting) {
-                                        // bắt đầu xem
+                                        // Bắt đầu xem
                                         if (!postViewStartTimes[postId]) {
                                             postViewStartTimes[postId] = Date.now();
                                         }
-                                    } else {
-                                        // ra khỏi view
-                                        if (postViewStartTimes[postId]) {
-                                            let duration = Math.floor((Date.now() - postViewStartTimes[postId]) /
-                                                1000);
-                                            sendDuration(postId, duration);
-                                            postViewStartTimes[postId] = null;
-                                        }
+                                    } else if (postViewStartTimes[postId]) {
+                                        // Rời khỏi vùng nhìn thấy
+                                        const duration = Math.floor((Date.now() - postViewStartTimes[postId]) / 1000);
+                                        sendDuration(postId, duration);
+                                        postViewStartTimes[postId] = null;
                                     }
                                 });
                             }, {
-                                threshold: 0.4 // 10% bài viết hiển thị -> tính là xem
+                                threshold: 0.4 // 40% bài viết hiển thị -> tính là xem
                             });
 
                             $('.post_container_duration').each(function() {
@@ -424,16 +436,18 @@
                             });
 
                             $(window).on('beforeunload', function() {
-                                for (let postId in postViewStartTimes) {
-                                    if (postViewStartTimes[postId]) {
-                                        let duration = Math.floor((Date.now() - postViewStartTimes[postId]) / 1000);
-                                        navigator.sendBeacon('{{ route('feed.updateDuration') }}', new URLSearchParams({
-                                            _token: '{{ csrf_token() }}',
-                                            post_id: postId,
-                                            duration: duration
-                                        }));
+                                Object.keys(postViewStartTimes).forEach(function(postId) {
+                                    if (!postViewStartTimes[postId]) {
+                                        return;
                                     }
-                                }
+
+                                    const duration = Math.floor((Date.now() - postViewStartTimes[postId]) / 1000);
+                                    navigator.sendBeacon('{{ route('feed.updateDuration') }}', new URLSearchParams({
+                                        _token: '{{ csrf_token() }}',
+                                        post_id: postId,
+                                        duration: duration
+                                    }));
+                                });
                             });
                         });
                     </script>
@@ -443,8 +457,7 @@
             </div>
         </div>
     </div>
-    @if (Auth::check())
-    @else
+    @unless (Auth::check())
         <button type="button" id="model_up" class="btn btn-primary" data-bs-toggle="modal"
             data-bs-target="#exampleModal" style="display: none">
         </button>
@@ -474,5 +487,5 @@
                 </div>
             </div>
         </div>
-    @endif
+    @endunless
 @endsection
