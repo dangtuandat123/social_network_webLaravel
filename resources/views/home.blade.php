@@ -116,6 +116,8 @@
                                                                 <option value="Giáo dục">Giáo dục</option>
                                                                 <option value="Chính trị">Chính trị</option>
                                                                 <option value="Y tế">Y tế</option>
+                                                                <option value="Khác">Khác</option>
+
 
                                                             </select>
                                                         </div>
@@ -186,10 +188,11 @@
 
                                                         </p>
                                                     </div>
-                                                    <div class="card-post-toolbar" >
+                                                    <div class="card-post-toolbar">
                                                         <b>
-                                                            <h5 class="mb-0 text-primary"  style="font-size: 0.8rem">Danh mục: <span
-                                                                    style="color: red">{{ $post->category }}</span></h5>
+                                                            <h5 class="mb-0 text-primary" style="font-size: 0.8rem">Danh
+                                                                mục: <span style="color: red">{{ $post->category }}</span>
+                                                            </h5>
                                                         </b>
 
 
@@ -308,13 +311,14 @@
                                             </symbol>
                                         </svg>
 
-                                        <div class="alert alert-solid alert-primary d-flex align-items-center mt-3" style="padding: 0.5rem"
-                                            role="alert">
+                                        <div class="alert alert-solid alert-primary d-flex align-items-center mt-3"
+                                            style="padding: 0.5rem" role="alert">
                                             <svg class="bi flex-shrink-0 me-2" width="24" height="24">
                                                 <use xlink:href="#info-fill"></use>
                                             </svg>
                                             <div>
-                                                Vui lòng <a style="color: red;" href="{{route('login')}}">Đăng nhập</a> để tương tác với bài viết!
+                                                Vui lòng <a style="color: red;" href="{{ route('login') }}">Đăng nhập</a>
+                                                để tương tác với bài viết!
 
                                             </div>
                                         </div>
@@ -345,10 +349,12 @@
 
                                         if (response.status === 'liked') {
                                             // Chuyển sang icon trái tim đỏ cho tất cả nút cùng bài viết
-                                            $likeButtons.find('img').attr('src', '{{ asset('template_assets/images/heart.png') }}');
+                                            $likeButtons.find('img').attr('src',
+                                                '{{ asset('template_assets/images/heart.png') }}');
                                         } else {
                                             // Hiển thị lại icon trái tim xám
-                                            $likeButtons.find('img').attr('src', '{{ asset('template_assets/images/heart (1).png') }}');
+                                            $likeButtons.find('img').attr('src',
+                                                '{{ asset('template_assets/images/heart (1).png') }}');
                                         }
                                     },
                                     error: function(error) {
@@ -422,7 +428,8 @@
                                         }
                                     } else if (feedViewStartTimes[feedId]) {
                                         // Rời khỏi vùng nhìn thấy
-                                        const duration = Math.floor((Date.now() - feedViewStartTimes[feedId]) / 1000);
+                                        const duration = Math.floor((Date.now() - feedViewStartTimes[feedId]) /
+                                            1000);
                                         sendDuration(feedId, duration);
                                         feedViewStartTimes[feedId] = null;
                                     }
@@ -447,7 +454,8 @@
                                         return;
                                     }
 
-                                    navigator.sendBeacon('{{ route('feed.updateDuration') }}', new URLSearchParams({
+                                    navigator.sendBeacon('{{ route('feed.updateDuration') }}',
+                                new URLSearchParams({
                                         _token: '{{ csrf_token() }}',
                                         feed_id: feedId,
                                         duration: duration
@@ -463,8 +471,8 @@
         </div>
     </div>
     @unless (Auth::check())
-        <button type="button" id="model_up" class="btn btn-primary" data-bs-toggle="modal"
-            data-bs-target="#exampleModal" style="display: none">
+        <button type="button" id="model_up" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal"
+            style="display: none">
         </button>
         <script>
             window.onload = function() {

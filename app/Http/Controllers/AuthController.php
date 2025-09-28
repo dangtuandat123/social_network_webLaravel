@@ -83,6 +83,7 @@ class AuthController extends Controller
         }
         $posts_category_khac = Post::where('category', "Khác")->get();
         $final_post = array_merge($final_post, $posts_category_khac->toArray());
+        // die(json_encode($final_post));
 
         shuffle($final_post);
         shuffle($final_post);
