@@ -79,8 +79,11 @@ class AuthController extends Controller
                     $final_post[] = $post;
                 }
             }
-            $index_random_number = $index_random_number +1;
+            $index_random_number = $index_random_number + 1;
         }
+        $posts_category_khac = Post::where('category', "Khác")->get();
+        $final_post = array_merge($final_post, $posts_category_khac->toArray());
+
         shuffle($final_post);
         shuffle($final_post);
 
