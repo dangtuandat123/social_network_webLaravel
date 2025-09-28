@@ -24,8 +24,20 @@ class HomeController extends Controller
                     ->orderBy('created_at', 'desc')
                     ->get()
                     ->map(function ($feed) {
-                        return $feed->post;
-                    });
+                        $post = $feed->post;
+
+                        if (!$post) {
+                            return null;
+                        }
+
+                        $postClone = clone $post;
+                        $postClone->setAttribute('feed_id', $feed->id);
+                        $postClone->setRelation('user', $post->user);
+
+                        return $postClone;
+                    })
+                    ->filter()
+                    ->values();
                 // die($posts);
              
             }
@@ -144,15 +156,26 @@ class HomeController extends Controller
     // Feed
     public function updateDuration(Request $request)
     {
-        $feed = Feed::where('user_id', Auth::id())
-            ->where('post_id', $request->post_id)
+        if (!Auth::check()) {
+            return response()->json(['success' => false, 'message' => 'Unauthenticated.'], 401);
+        }
+
+        $validated = $request->validate([
+            'feed_id' => 'required|integer',
+            'duration' => 'required|integer|min:1',
+        ]);
+
+        $feed = Feed::where('id', $validated['feed_id'])
+            ->where('user_id', Auth::id())
             ->first();
 
-        if ($feed) {
-            $feed->view_duration += $request->duration;
-            $feed->view = true;
-            $feed->save();
+        if (!$feed) {
+            return response()->json(['success' => false, 'message' => 'Feed not found.'], 404);
         }
+
+        $feed->view_duration += $validated['duration'];
+        $feed->view = true;
+        $feed->save();
 
         return response()->json(['success' => true]);
     }

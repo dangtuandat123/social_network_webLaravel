@@ -167,7 +167,7 @@
                         </div>
                     @endif
                     @foreach ($posts as $post)
-                        <div class="col-sm-9 post_container_duration" data-post-id="{{ $post->feed_id }}">
+                        <div class="col-sm-9 post_container_duration" data-feed-id="{{ $post->feed_id ?? '' }}">
                             <div class="card card-block card-stretch card-height">
                                 <div class="card-body" style="padding:0.5rem 0.5rem">
                                     <div class="user-post-data">
@@ -381,11 +381,11 @@
                                 });
                             });
 
-                            // Lưu thời gian bắt đầu xem cho mỗi bài
-                            const postViewStartTimes = {};
+                            // Lưu thời gian bắt đầu xem cho mỗi feed
+                            const feedViewStartTimes = {};
 
                             // Gửi duration lên server
-                            function sendDuration(postId, duration) {
+                            function sendDuration(feedId, duration) {
                                 if (duration <= 0) return; // Bỏ qua nếu duration = 0
 
                                 $.ajax({
@@ -393,14 +393,14 @@
                                     type: 'POST',
                                     data: {
                                         _token: '{{ csrf_token() }}',
-                                        post_id: postId,
+                                        feed_id: feedId,
                                         duration: duration
                                     },
                                     success: function() {
-                                        console.log('Bài', postId, 'đã xem', duration, 'giây');
+                                        console.log('Feed', feedId, 'được xem', duration, 'giây');
                                     },
                                     error: function() {
-                                        console.error('Lỗi gửi thời gian xem bài', postId);
+                                        console.error('Lỗi gửi thời gian xem feed', feedId);
                                     }
                                 });
                             }
@@ -409,22 +409,22 @@
                             const observer = new IntersectionObserver(function(entries) {
                                 entries.forEach(entry => {
                                     const $el = $(entry.target);
-                                    const postId = $el.data('post-id');
+                                    const feedId = $el.data('feed-id');
 
-                                    if (!postId) {
+                                    if (!feedId) {
                                         return;
                                     }
 
                                     if (entry.isIntersecting) {
                                         // Bắt đầu xem
-                                        if (!postViewStartTimes[postId]) {
-                                            postViewStartTimes[postId] = Date.now();
+                                        if (!feedViewStartTimes[feedId]) {
+                                            feedViewStartTimes[feedId] = Date.now();
                                         }
-                                    } else if (postViewStartTimes[postId]) {
+                                    } else if (feedViewStartTimes[feedId]) {
                                         // Rời khỏi vùng nhìn thấy
-                                        const duration = Math.floor((Date.now() - postViewStartTimes[postId]) / 1000);
-                                        sendDuration(postId, duration);
-                                        postViewStartTimes[postId] = null;
+                                        const duration = Math.floor((Date.now() - feedViewStartTimes[feedId]) / 1000);
+                                        sendDuration(feedId, duration);
+                                        feedViewStartTimes[feedId] = null;
                                     }
                                 });
                             }, {
@@ -436,15 +436,20 @@
                             });
 
                             $(window).on('beforeunload', function() {
-                                Object.keys(postViewStartTimes).forEach(function(postId) {
-                                    if (!postViewStartTimes[postId]) {
+                                Object.keys(feedViewStartTimes).forEach(function(feedId) {
+                                    if (!feedViewStartTimes[feedId]) {
                                         return;
                                     }
 
-                                    const duration = Math.floor((Date.now() - postViewStartTimes[postId]) / 1000);
+                                    const duration = Math.floor((Date.now() - feedViewStartTimes[feedId]) / 1000);
+
+                                    if (duration <= 0) {
+                                        return;
+                                    }
+
                                     navigator.sendBeacon('{{ route('feed.updateDuration') }}', new URLSearchParams({
                                         _token: '{{ csrf_token() }}',
-                                        post_id: postId,
+                                        feed_id: feedId,
                                         duration: duration
                                     }));
                                 });
