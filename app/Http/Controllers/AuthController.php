@@ -61,12 +61,13 @@ class AuthController extends Controller
         Auth::login($user);
 
         $final_post = [];
-        $random_numbers = [3, 5, 7];
+        $random_numbers = [1, 3, 7];
 
         $index_random_number = 0;
 
         // tao feed 
-        $categorys = Post::select('category')->distinct()->pluck('category');
+        // $categorys = Post::select('category')->distinct()->pluck('category');
+        $categorys = ['Giáo dục', 'Chính trị', 'Y tế'];
         foreach ($categorys as $category) {
             $posts = Post::where('category', $category)->get();
             $post_random = $posts->shuffle()->take(round($posts->count() / 3));
