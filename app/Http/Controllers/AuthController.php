@@ -95,8 +95,9 @@ class AuthController extends Controller
         foreach ($final_post as $post) {
             Feed::create([
                 'user_id' => Auth::id(),
-                'post_id' => $post->id,
+                'post_id' => $post['id'],
                 'view' => false,
+                'view_duration' => 0,
             ]);
         }
 
