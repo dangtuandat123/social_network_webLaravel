@@ -12,6 +12,7 @@ class Share extends Model
     protected $fillable = [
         'post_id',
         'user_id',
+        'caption',
     ];
 
     // Quan hệ với bài viết

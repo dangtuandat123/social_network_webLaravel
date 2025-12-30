@@ -30,7 +30,7 @@ Route::post('/store-post', [HomeController::class, 'store'])->name('post.store')
 Route::post('/delete-post/{post}', [HomeController::class, 'deletePost'])->name('post.deletePost')->middleware('auth');
 
 Route::get('/profile', [ProfileController::class, 'index'])->name('profile')->middleware('auth');
-Route::post('/share-to-profile/{post}', [HomeController::class, 'shareToProfile'])->name('post.shareToProfile')->middleware('auth');
+Route::post('/share-to-profile/{post}', [HomeController::class, 'shareToProfile'])->name('share.store')->middleware('auth');
 Route::post('/like/{post}', [HomeController::class, 'toggleLike'])->name('post.like')->middleware('auth');
 Route::post('/delete-share/{post}', [HomeController::class, 'deleteShare'])->name('post.deleteShare')->middleware('auth');
 

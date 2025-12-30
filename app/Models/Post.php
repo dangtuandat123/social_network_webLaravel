@@ -12,8 +12,10 @@ class Post extends Model
     protected $fillable = [
         'title',
         'list_img',
+        'list_video',
         'useridpost',
         'fakeorreal',
+        'category',
     ];
 
     // Nếu 'list_img' là JSON, bạn có thể muốn sử dụng cast

@@ -99,14 +99,16 @@
 
                                 <div class="col-sm-9 ">
 
-                                    @if ($posts->isEmpty())
+                                    @if ($shares->isEmpty())
                                         <div class="col-sm-12">
                                             <div class="alert alert-info" role="alert">
                                                 Hiện tại không có bài viết nào trên trang cá nhân của bạn.
                                             </div>
                                         </div>
                                     @endif
-                                    @foreach ($posts as $post)
+                                    @foreach ($shares as $share)
+                                        @php $post = $share->post; @endphp
+                                        @if($post)
                                         <div class="col-sm-12">
                                             <div class="card card-block card-stretch card-height">
                                                 <div class="card-body">
@@ -121,11 +123,11 @@
                                                                 <div class="d-flex justify-content-between">
                                                                     <div class="">
                                                                         <h5 class="mb-0 d-inline-block">
-                                                                            {{ $post->user->name }}</h5>
-
-                                                                        <p class="mb-0 text-primary">
-                                                                            {{ $post->created_at->format('d/m/Y H:i') }}
-
+                                                                            {{ Auth::user()->name }}</h5>
+                                                                        <span class="text-muted">đã chia sẻ bài viết của</span>
+                                                                        <span class="text-primary fw-semibold">{{ $post->user->name ?? 'Unknown' }}</span>
+                                                                        <p class="mb-0 text-muted">
+                                                                            {{ $share->created_at->format('d/m/Y H:i') }}
                                                                         </p>
                                                                     </div>
                                                                     <div class="card-post-toolbar">
@@ -170,21 +172,76 @@
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div class="mt-3">
-                                                        <p>
-                                                            {{ $post->title }}
-                                                        </p>
-                                                    </div>
-                                                    <div class="user-post">
-                                                        <div class="row-span-2 row-span-md-1">
-                                                            <img style="max-height: 30rem;object-fit: cover;"
-                                                                src="{{ asset('storage/' . $post->list_img) }}"
-                                                                alt="post-image" class="img-fluid rounded w-100" />
+                                                    
+                                                    {{-- Caption của người share --}}
+                                                    @if($share->caption)
+                                                        <div class="mt-3 p-3 bg-light rounded">
+                                                            <p class="mb-0 fst-italic">"{{ $share->caption }}"</p>
                                                         </div>
-
-
-
+                                                    @endif
+                                                    
+                                                    {{-- Nội dung bài viết gốc --}}
+                                                    <div class="mt-3 border-start border-3 border-primary ps-3">
+                                                        <p class="fw-semibold mb-2">{{ $post->title }}</p>
                                                     </div>
+                                                    
+                                                    {{-- Hiển thị ảnh --}}
+                                                    @if(!empty($post->list_img))
+                                                        @php
+                                                            $images = array_filter(explode(',', $post->list_img));
+                                                        @endphp
+                                                        <div class="user-post mt-3">
+                                                            @if(count($images) === 1)
+                                                                <img style="max-height: 30rem; object-fit: cover;"
+                                                                    src="{{ asset('storage/' . trim($images[0])) }}"
+                                                                    alt="post-image" class="img-fluid rounded w-100" loading="lazy" />
+                                                            @else
+                                                                <div id="profile-carousel-{{ $share->id }}" class="carousel slide" data-bs-ride="carousel">
+                                                                    <div class="carousel-inner">
+                                                                        @foreach($images as $index => $image)
+                                                                            <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
+                                                                                <img src="{{ asset('storage/' . trim($image)) }}" 
+                                                                                    alt="post-image" 
+                                                                                    class="d-block w-100" 
+                                                                                    loading="lazy"
+                                                                                    style="max-height: 30rem; object-fit: cover; border-radius: 12px;">
+                                                                            </div>
+                                                                        @endforeach
+                                                                    </div>
+                                                                    <button class="carousel-control-prev" type="button" data-bs-target="#profile-carousel-{{ $share->id }}" data-bs-slide="prev">
+                                                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                                                    </button>
+                                                                    <button class="carousel-control-next" type="button" data-bs-target="#profile-carousel-{{ $share->id }}" data-bs-slide="next">
+                                                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                                                    </button>
+                                                                </div>
+                                                            @endif
+                                                        </div>
+                                                    @endif
+                                                    
+                                                    {{-- Hiển thị video --}}
+                                                    @if(!empty($post->list_video))
+                                                        @php
+                                                            $videos = array_filter(explode(',', $post->list_video));
+                                                        @endphp
+                                                        <div class="user-post mt-3">
+                                                            @foreach($videos as $video)
+                                                                <div class="video-container mb-2" style="border-radius: 12px; overflow: hidden;">
+                                                                    <video 
+                                                                        class="auto-play-video"
+                                                                        controls 
+                                                                        playsinline
+                                                                        preload="metadata"
+                                                                        style="width: 100%; max-height: 30rem; background: #000;">
+                                                                        <source src="{{ asset('storage/' . trim($video)) }}" type="video/mp4">
+                                                                        <source src="{{ asset('storage/' . trim($video)) }}" type="video/webm">
+                                                                        Trình duyệt không hỗ trợ video.
+                                                                    </video>
+                                                                </div>
+                                                            @endforeach
+                                                        </div>
+                                                    @endif
+                                                    
                                                     @if (Auth::check())
                                                         <div class="comment-area mt-3">
                                                             <div
@@ -204,56 +261,16 @@
                                                                                     alt="like-icon"
                                                                                     style="width: 26px;height: 26px;" />
                                                                             </button>
-
-
-
                                                                         </div>
-
                                                                     </div>
-
                                                                 </div>
-
-
-                                                            </div>
-
-                                                        </div>
-                                                    @else
-                                                        <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
-                                                            <symbol id="check-circle-fill" fill="currentColor"
-                                                                viewBox="0 0 16 16">
-                                                                <path
-                                                                    d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z">
-                                                                </path>
-                                                            </symbol>
-                                                            <symbol id="info-fill" fill="currentColor"
-                                                                viewBox="0 0 16 16">
-                                                                <path
-                                                                    d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z">
-                                                                </path>
-                                                            </symbol>
-                                                            <symbol id="exclamation-triangle-fill" fill="currentColor"
-                                                                viewBox="0 0 16 16">
-                                                                <path
-                                                                    d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z">
-                                                                </path>
-                                                            </symbol>
-                                                        </svg>
-
-                                                        <div class="alert alert-solid alert-primary d-flex align-items-center mt-3"
-                                                            role="alert">
-                                                            <svg class="bi flex-shrink-0 me-2" width="24"
-                                                                height="24">
-                                                                <use xlink:href="#info-fill"></use>
-                                                            </svg>
-                                                            <div>
-                                                                vui lòng bình luận để tương tác với bài viết!
-
                                                             </div>
                                                         </div>
                                                     @endif
                                                 </div>
                                             </div>
                                         </div>
+                                        @endif
                                     @endforeach
                                     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
                                     <script>

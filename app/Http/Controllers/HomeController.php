@@ -11,38 +11,59 @@ use App\Models\Feed;
 use App\Models\Like;
 use Illuminate\Support\Facades\Auth;
 
+use Illuminate\Support\Facades\Cache;
+
 class HomeController extends Controller
 {
+    // Số posts per page - có thể điều chỉnh
+    private const POSTS_PER_PAGE = 10;
+
     public function index(Request $request)
     {
+        $page = $request->get('page', 1);
+        
         if (Auth::check()) {
-            if (Auth::user()->level == 1) {
-                $posts = Post::with('user')->orderBy('id', 'desc')->get();
+            $userId = Auth::id();
+            $userLevel = Auth::user()->level;
+            
+            if ($userLevel == 1) {
+                // Admin: cache danh sách posts trong 5 phút
+                $cacheKey = "admin_posts_page_{$page}";
+                $posts = Cache::remember($cacheKey, 300, function () {
+                    return Post::with('user')
+                        ->orderBy('id', 'desc')
+                        ->paginate(self::POSTS_PER_PAGE);
+                });
             } else {
-                $posts = Feed::with(['post.user'])
-                    ->where('user_id', Auth::id())
+                // User thường: lấy feed cá nhân với pagination
+                $feeds = Feed::with(['post.user'])
+                    ->where('user_id', $userId)
                     ->orderBy('created_at', 'desc')
-                    ->get()
-                    ->map(function ($feed) {
-                        $post = $feed->post;
+                    ->paginate(self::POSTS_PER_PAGE);
 
-                        if (!$post) {
-                            return null;
-                        }
+                // Transform feeds thành posts với feed_id
+                $posts = $feeds->through(function ($feed) {
+                    $post = $feed->post;
+                    
+                    if (!$post) {
+                        return null;
+                    }
 
-                        $postClone = clone $post;
-                        $postClone->setAttribute('feed_id', $feed->id);
-                        $postClone->setRelation('user', $post->user);
+                    $postClone = clone $post;
+                    $postClone->setAttribute('feed_id', $feed->id);
+                    $postClone->setRelation('user', $post->user);
 
-                        return $postClone;
-                    })
-                    ->filter()
-                    ->values();
-                // die($posts);
-             
+                    return $postClone;
+                })->filter();
             }
         } else {
-            $posts = Post::with('user')->orderBy('id', 'desc')->get();
+            // Guest: cache danh sách posts trong 5 phút
+            $cacheKey = "guest_posts_page_{$page}";
+            $posts = Cache::remember($cacheKey, 300, function () {
+                return Post::with('user')
+                    ->orderBy('id', 'desc')
+                    ->paginate(self::POSTS_PER_PAGE);
+            });
         }
 
         return view('home', compact('posts'));
@@ -50,83 +71,143 @@ class HomeController extends Controller
     public function store(Request $request)
     {
         // Validate dữ liệu nhập vào
+        // Ảnh hoặc video phải có ít nhất 1 trong 2
         $request->validate([
             'title' => 'required|string|max:255',
-            'list_img' => 'required|array',
+            'list_img' => 'nullable|array',
             'list_img.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'list_video' => 'nullable|array',
+            'list_video.*' => 'mimetypes:video/mp4,video/webm,video/quicktime|max:512000', // 500MB
             'useridpost' => 'required|exists:users,id',
             'fakeorreal' => 'required|string|in:real,fake',
+            'category' => 'required|string|in:Giáo dục,Chính trị,Y tế,Khác',
         ]);
 
+        // Kiểm tra phải có ít nhất ảnh hoặc video
+        if (!$request->hasFile('list_img') && !$request->hasFile('list_video')) {
+            return redirect()->back()->withErrors(['media' => 'Vui lòng tải lên ít nhất một hình ảnh hoặc video.']);
+        }
+
+        // Upload ảnh
         $imagePaths = [];
         if ($request->hasFile('list_img')) {
             foreach ($request->file('list_img') as $image) {
-                $path = $image->store('uploads', 'public');
+                $path = $image->store('uploads/images', 'public');
                 $imagePaths[] = $path;
+            }
+        }
+
+        // Upload video
+        $videoPaths = [];
+        if ($request->hasFile('list_video')) {
+            foreach ($request->file('list_video') as $video) {
+                $path = $video->store('uploads/videos', 'public');
+                $videoPaths[] = $path;
             }
         }
 
         $post = new Post();
         $post->title = $request->input('title');
-        $post->list_img = implode(',', $imagePaths);
+        $post->list_img = !empty($imagePaths) ? implode(',', $imagePaths) : null;
+        $post->list_video = !empty($videoPaths) ? implode(',', $videoPaths) : null;
         $post->useridpost = $request->input('useridpost');
         $post->fakeorreal = $request->input('fakeorreal');
         $post->category = $request->input('category');
 
         $post->save();
 
+        // Clear cache để cập nhật danh sách posts
+        Cache::flush();
 
-        return redirect('home');
+        return redirect('home')->with('success', 'Bài viết đã được tạo thành công!');
     }
     public function deletePost($postId)
     {
         try {
             $post = Post::findOrFail($postId);
-            $img = $post->list_img;
-            if ($img) {
-                $images = explode(',', $img);
+            
+            // Xóa ảnh
+            if ($post->list_img) {
+                $images = explode(',', $post->list_img);
                 foreach ($images as $image) {
-                    $imagePath = public_path('storage/' . $image);
+                    $imagePath = public_path('storage/' . trim($image));
                     if (file_exists($imagePath)) {
-                        //xoa file 
                         unlink($imagePath);
                     }
                 }
             }
+            
+            // Xóa video
+            if ($post->list_video) {
+                $videos = explode(',', $post->list_video);
+                foreach ($videos as $video) {
+                    $videoPath = public_path('storage/' . trim($video));
+                    if (file_exists($videoPath)) {
+                        unlink($videoPath);
+                    }
+                }
+            }
+            
             $post->delete();
+            
+            // Clear cache để cập nhật danh sách posts
+            Cache::flush();
         } catch (\Throwable $th) {
+            \Log::error('Delete post failed: ' . $th->getMessage());
             return redirect()->back()->with('error', 'Không thể xóa bài viết này.');
         }
 
         return redirect()->route('home')->with('success', 'Bài viết đã được xóa thành công!');
     }
-    public function shareToProfile($id)
+    public function shareToProfile(Request $request, $id)
     {
         try {
             $user = auth()->user();
+            
+            // Validate caption (bắt buộc)
+            $request->validate([
+                'caption' => 'required|string|max:1000',
+            ], [
+                'caption.required' => 'Vui lòng nhập caption cho bài chia sẻ.',
+            ]);
+            
+            // Kiểm tra xem đã share chưa
+            $existingShare = Share::where('post_id', $id)
+                ->where('user_id', $user->id)
+                ->first();
+            
+            if ($existingShare) {
+                return redirect()->route('home')->with('info', 'Bạn đã chia sẻ bài viết này rồi.');
+            }
 
             Share::create([
                 'post_id' => $id,
                 'user_id' => $user->id,
+                'caption' => $request->input('caption'),
             ]);
+            
+            return redirect()->route('home')->with('success', 'Bài viết đã được chia sẻ lên trang cá nhân!');
         } catch (\Throwable $th) {
+            \Log::error('Share failed: ' . $th->getMessage());
+            return redirect()->route('home')->with('error', 'Không thể chia sẻ bài viết. Vui lòng thử lại.');
         }
-
-        return redirect()->route('home')->with('success', 'Bài viết đã được chia sẻ lên trang cá nhân!');
     }
     public function deleteShare($postId)
     {
         try {
             $user = auth()->user();
-            $Share = Share::where('post_id', $postId)->where('user_id', $user->id)->first();
+            $share = Share::where('post_id', $postId)->where('user_id', $user->id)->first();
 
-            if ($Share) {
-                $Share->delete();
+            if ($share) {
+                $share->delete();
+                return redirect()->route('profile')->with('success', 'Đã xóa chia sẻ thành công.');
             }
+            
+            return redirect()->route('profile')->with('info', 'Không tìm thấy bài chia sẻ.');
         } catch (\Throwable $th) {
+            \Log::error('Delete share failed: ' . $th->getMessage());
+            return redirect()->route('profile')->with('error', 'Không thể xóa chia sẻ. Vui lòng thử lại.');
         }
-
-        return redirect()->route('profile');
     }
     public function toggleLike($postId)
     {

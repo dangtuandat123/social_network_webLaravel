@@ -9,7 +9,6 @@ use App\Models\Post;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Nette\Utils\Random;
 
 class AuthController extends Controller
 {
@@ -60,46 +59,45 @@ class AuthController extends Controller
         ]);
         Auth::login($user);
 
-        $final_post = [];
-        $random_numbers = [1, 3, 7];
+        // Tạo feed với weight thay vì duplicate entries
+        // Weight đại diện cho tần suất hiển thị: Giáo dục x1, Chính trị x3, Y tế x7
+        $categoryWeights = [
+            'Giáo dục' => 1,
+            'Chính trị' => 3,
+            'Y tế' => 7,
+            'Khác' => 1,
+        ];
 
-        $index_random_number = 0;
+        $feedEntries = [];
 
-        // tao feed 
-        // $categorys = Post::select('category')->distinct()->pluck('category');
-        $categorys = ['Giáo dục', 'Chính trị', 'Y tế'];
-        foreach ($categorys as $category) {
+        foreach ($categoryWeights as $category => $weight) {
             $posts = Post::where('category', $category)->get();
-            $post_random = $posts->shuffle()->take(round($posts->count() / 3));
-
-            $random_number = $random_numbers[$index_random_number];
-
-            foreach ($post_random as $post) {
-                for ($i = 0; $i < $random_number; $i++) {
-                    $final_post[] = $post;
-                }
+            
+            // Lấy 1/3 số posts của mỗi category (trừ "Khác" lấy tất cả)
+            if ($category === 'Khác') {
+                $selectedPosts = $posts;
+            } else {
+                $selectedPosts = $posts->shuffle()->take(max(1, round($posts->count() / 3)));
             }
-            $index_random_number = $index_random_number + 1;
+
+            foreach ($selectedPosts as $post) {
+                $feedEntries[] = [
+                    'user_id' => Auth::id(),
+                    'post_id' => $post->id,
+                    'view' => false,
+                    'view_duration' => 0,
+                    'weight' => $weight,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
         }
-        $posts_category_khac = Post::where('category', "Khác")->get();
-        $final_post = array_merge($final_post, $posts_category_khac->toArray());
-        // die(json_encode($final_post));
 
-        shuffle($final_post);
-        shuffle($final_post);
+        // Shuffle để trộn các category với nhau
+        shuffle($feedEntries);
 
-
-
-
-        // die(json_encode($final_post));
-        foreach ($final_post as $post) {
-            Feed::create([
-                'user_id' => Auth::id(),
-                'post_id' => $post['id'],
-                'view' => false,
-                'view_duration' => 0,
-            ]);
-        }
+        // Insert tất cả feed entries (không có duplicate vì mỗi post_id chỉ xuất hiện 1 lần)
+        Feed::insert($feedEntries);
 
         return redirect('/home');
     }

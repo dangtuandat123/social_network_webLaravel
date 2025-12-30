@@ -17,6 +17,8 @@ class Feed extends Model
         'post_id',
         'user_id',
         'view',
+        'view_duration',
+        'weight',
     ];
 
     /**
