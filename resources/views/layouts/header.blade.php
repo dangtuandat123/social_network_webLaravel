@@ -1,110 +1,83 @@
-{{-- 
-    <div class="iq-sidebar sidebar-default">
-        <div id="sidebar-scrollbar">
-            <nav class="iq-sidebar-menu">
-                <ul id="iq-sidebar-toggle" class="iq-menu">
-                    <li class="{{ request()->routeIs('home') ? 'active' : '' }}">
-                        <a href="{{ route('home') }}" class=" ">
-                            <i class="las la-newspaper"></i><span>Newsfeed</span>
+{{-- Navbar --}}
+<nav class="navbar navbar-expand-lg fixed-top" style="background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color);">
+    <div class="container">
+        {{-- Logo --}}
+        <a class="navbar-brand d-flex align-items-center" href="{{ route('home') }}" style="font-weight: 700; font-size: 1.5rem; color: var(--primary);">
+            <i class="ri-bubble-chart-fill me-2"></i>
+            Social
+        </a>
+
+        {{-- Toggle Button Mobile --}}
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+            <i class="ri-menu-3-line" style="font-size: 1.5rem;"></i>
+        </button>
+
+        {{-- Navbar Content --}}
+        <div class="collapse navbar-collapse" id="navbarMain">
+            <ul class="navbar-nav ms-auto align-items-center gap-1">
+                @if (Auth::check())
+                    {{-- Home Link --}}
+                    <li class="nav-item">
+                        <a href="{{ route('home') }}" class="nav-link px-3 py-2 rounded-pill {{ request()->routeIs('home') ? 'bg-primary bg-opacity-10 text-primary' : '' }}" style="font-weight: 500;">
+                            <i class="ri-home-line me-1"></i> Trang chủ
                         </a>
                     </li>
-                    @if (Auth::check())
-                        <li class="{{ request()->routeIs('profile') ? 'active' : '' }}">
-                            <a href="{{ route('profile') }}" class=" ">
-                                <i class="las la-user"></i><span>Profile</span>
-                            </a>
-                        </li>
                     
-                    @endif
-                </ul>
-                
-
-            </nav>
-            <div class="p-5"></div>
-        </div>
-    </div> --}}
-
-<div class="iq-top-navbar">
-    <div class="iq-navbar-custom">
-        <nav class="navbar navbar-expand-lg navbar-light p-0">
-            <div class="iq-navbar-logo d-flex justify-content-between">
-                <a href="{{ route('home') }}">
-                    <span>Social</span>
-                </a>
-            </div>
-
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
-                aria-controls="navbarSupportedContent" aria-label="Toggle navigation">
-                <i class="ri-menu-3-line"></i>
-            </button>
-            <div class="collapse navbar-collapse " id="navbarSupportedContent">
-                <ul class="navbar-nav ms-auto navbar-list">
-                    @if (Auth::check())
-                        <li>
-                            <a href="{{ route('home') }}" class="d-flex align-items-center" style="font-weight: 500">
-                                <i class="ri-home-line"></i><span>Home</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('profile') }}" class="d-flex align-items-center" style="font-weight: 500">
-                                <i class="las la-user"></i><span>Profile</span>
-                            </a>
-                        </li>
-                    @endif
-
-                    @if (Auth::check())
-                        <li class="nav-item dropdown">
-                            <a href="#" class="d-flex align-items-center dropdown-toggle" id="drop-down-arrow"
-                                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <img src="https://avatars.fastly.steamstatic.com/79d0a512c5512bf571c21ed9af845382cc595543_full.jpg"
-                                    class="img-fluid rounded-circle me-3" alt="user" />
-                                <div class="caption">
-                                    <h6 class="mb-0 line-height"></h6>
-                                </div>
-                            </a>
-                            <div class="sub-drop dropdown-menu caption-menu" aria-labelledby="drop-down-arrow">
-                                <div class="card shadow-none m-0">
-                                    <div class="card-header bg-primary">
-                                        <div class="header-title">
-                                            <h5 class="mb-0 text-white">Chào {{ Auth::user()->name }}</h5>
-                                        </div>
-                                    </div>
-                                    <div class="card-body p-0">
-                                        <a href="{{ route('profile') }}" class="iq-sub-card iq-bg-primary-hover">
-                                            <div class="d-flex align-items-center">
-                                                <div class="rounded card-icon bg-soft-primary">
-                                                    <i class="ri-file-user-line"></i>
-                                                </div>
-                                                <div class="ms-3">
-                                                    <h6 class="mb-0">Trang cá nhân</h6>
-                                                    <p class="mb-0 font-size-12">
-                                                        Vào trang cá nhân của bạn.
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </a>
-
-
-                                        <div class="d-inline-block w-100 text-center p-3">
-                                            <form action="{{ route(name: 'logout') }}" method="POST">
-                                                @csrf
-                                                <button type="submit" class="btn btn-primary iq-sign-btn"
-                                                    role="button">Đăng xuất<i
-                                                        class="ri-login-box-line ms-2"></i></button>
-                                            </form>
-
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
-                    @else
-                        <a class="nav-item dropdown" href="{{ route('login') }}">
-                            <button type="button" class="btn btn-primary mb-1">Đăng nhập</button>
+                    {{-- Profile Link --}}
+                    <li class="nav-item">
+                        <a href="{{ route('profile') }}" class="nav-link px-3 py-2 rounded-pill {{ request()->routeIs('profile') ? 'bg-primary bg-opacity-10 text-primary' : '' }}" style="font-weight: 500;">
+                            <i class="ri-user-line me-1"></i> Trang cá nhân
                         </a>
-                    @endif
-                </ul>
-            </div>
-        </nav>
+                    </li>
+
+                    {{-- User Dropdown --}}
+                    <li class="nav-item dropdown ms-2">
+                        <a href="#" class="nav-link dropdown-toggle d-flex align-items-center p-0" data-bs-toggle="dropdown">
+                            @if(Auth::user()->avatar)
+                                <img src="{{ asset('storage/' . Auth::user()->avatar) }}" 
+                                    class="rounded-circle" 
+                                    style="width: 40px; height: 40px; object-fit: cover; border: 2px solid var(--border-color);" 
+                                    alt="Avatar">
+                            @else
+                                <img src="{{ asset('template_assets/images/user/01.jpg') }}" 
+                                    class="rounded-circle" 
+                                    style="width: 40px; height: 40px; object-fit: cover; border: 2px solid var(--border-color);" 
+                                    alt="Avatar">
+                            @endif
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2" style="min-width: 220px; border-radius: var(--radius-md);">
+                            <li class="px-3 py-2 border-bottom">
+                                <div style="font-weight: 600; color: var(--text-primary);">{{ Auth::user()->name }}</div>
+                                <small class="text-muted">{{ Auth::user()->email }}</small>
+                            </li>
+                            <li>
+                                <a class="dropdown-item py-2" href="{{ route('profile') }}">
+                                    <i class="ri-user-settings-line me-2"></i> Trang cá nhân
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider my-1"></li>
+                            <li>
+                                <form action="{{ route('logout') }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item py-2 text-danger">
+                                        <i class="ri-logout-box-line me-2"></i> Đăng xuất
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                @else
+                    {{-- Login Button --}}
+                    <li class="nav-item">
+                        <a href="{{ route('login') }}" class="btn btn-primary px-4">
+                            <i class="ri-login-box-line me-1"></i> Đăng nhập
+                        </a>
+                    </li>
+                @endif
+            </ul>
+        </div>
     </div>
-</div>
+</nav>
+
+{{-- Spacer for fixed navbar --}}
+<div style="height: 70px;"></div>

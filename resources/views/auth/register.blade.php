@@ -1,101 +1,237 @@
-<!-- HTML Header: Bao gồm các import cần thiết -->
-
+<!DOCTYPE html>
+<html lang="vi">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>SocialV | Responsive Bootstrap 4 Admin Dashboard Template</title>
-
-    <link rel="shortcut icon" href="{{ asset('template_assets/images/favicon.ico') }}" />
-    <link rel="stylesheet" href="{{ asset('template_assets/css/libs.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('template_assets/css/socialv.css?v=4.0.0') }}">
-    <link rel="stylesheet" href="{{ asset('template_assets/vendor/@fortawesome/fontawesome-free/css/all.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('template_assets/vendor/remixicon/fonts/remixicon.css') }}">
-    <link rel="stylesheet"
-        href="{{ asset('template_assets/vendor/vanillajs-datepicker/dist/css/datepicker.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('template_assets/vendor/font-awesome-line-awesome/css/all.min.css') }}">
-    <link rel="stylesheet"
-        href="{{ asset('template_assets/vendor/line-awesome/dist/line-awesome/css/line-awesome.min.css') }}">
-</head>
-
-<!-- Nội dung trang đăng ký -->
-<div class="wrapper">
-    <section class="sign-in-page">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Đăng ký | Social Media</title>
     
-        <div class="container p-0">
-            <div class="row no-gutters d-flex justify-content-center align-items-center min-vh-100">
-                <div class="col-md-6 col-sm-12 bg-white pt-5 pb-5">
-                    <div class="sign-in-from">
-                        <h1 class="mb-0 text-center">Đăng ký</h1>
-                        <p class="text-center">Nhập thông tin của bạn để tạo tài khoản.</p>
-                    
-                        <!-- Container lỗi với max-height + scroll -->
-                        @if ($errors->any())
-                            <div class="alert alert-danger" style="max-height:150px; overflow-y:auto;">
-                                <ul class="mb-0">
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
-                    
-                        <form action="{{ route('register') }}" method="POST" style="display:flex; flex-direction:column; height:100%;">
-                            @csrf
-                    
-                            <div class="form-group">
-                                <label>Họ và tên *</label>
-                                <input name="name" type="text" class="form-control" value="{{ old('name') }}" required />
-                            </div>
-                    
-                            <div class="form-group">
-                                <label>Địa chỉ Email *</label>
-                                <input name="email" type="email" class="form-control" value="{{ old('email') }}" required />
-                            </div>
-                    
-                            <div class="form-group">
-                                <label for="gender">Giới tính</label>
-                                <select name="gender" id="gender" class="form-control">
-                                    <option value="male" {{ old('gender') == 'male' ? 'selected' : '' }}>Nam</option>
-                                    <option value="female" {{ old('gender') == 'female' ? 'selected' : '' }}>Nữ</option>
-                                    <option value="other" {{ old('gender') == 'other' ? 'selected' : '' }}>Khác</option>
-                                </select>
-                            </div>
-                    
-                            <div class="form-group">
-                                <label>Mật khẩu *</label>
-                                <input name="password" type="password" class="form-control" required />
-                            </div>
-                    
-                            <div class="form-group">
-                                <label>Nhập lại mật khẩu *</label>
-                                <input name="password_confirmation" type="password" class="form-control" required />
-                            </div>
-                    
-                            <!-- Spacer để đẩy nút xuống cuối -->
-                            <div style="flex-grow:1;"></div>
-                    
-                            <div class="form-submit-group">
-                                <button type="submit" class="btn btn-primary btn-gradient hover-icon-reverse w-100">Đăng ký</button>
-                            </div>
-                    
-                            <div class="text-center mt-3">
-                                <a class="rbt-btn-link" href="{{ route('login') }}">Bạn đã có tài khoản? Đăng nhập</a>
-                            </div>
-                        </form>
-                    </div>
-                    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #3B82F6;
+            --primary-dark: #2563EB;
+            --bg-main: #F8FAFC;
+            --text-primary: #1E293B;
+            --text-muted: #94A3B8;
+            --border-color: #E2E8F0;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        
+        .auth-container {
+            width: 100%;
+            max-width: 420px;
+        }
+        
+        .auth-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+        }
+        
+        .auth-logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .auth-logo i {
+            font-size: 3rem;
+            color: var(--primary);
+        }
+        
+        .auth-logo h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-top: 0.5rem;
+        }
+        
+        .auth-logo p {
+            color: var(--text-muted);
+            margin: 0;
+        }
+        
+        .form-label {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .form-control, .form-select {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            border-color: var(--primary);
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            border-radius: 8px;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+        
+        .auth-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--text-muted);
+        }
+        
+        .auth-footer a {
+            color: var(--primary);
+            font-weight: 500;
+            text-decoration: none;
+        }
+        
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .input-group-text {
+            background: transparent;
+            border-right: none;
+        }
+        
+        .input-group .form-control {
+            border-left: none;
+        }
+        
+        .input-group:focus-within .input-group-text {
+            border-color: var(--primary);
+        }
+        
+        .gender-options {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .gender-option {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .gender-option input {
+            display: none;
+        }
+        
+        .gender-option label {
+            display: block;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .gender-option input:checked + label {
+            border-color: var(--primary);
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-logo">
+                <i class="ri-bubble-chart-fill"></i>
+                <h1>Đăng ký</h1>
+                <p>Tạo tài khoản mới</p>
+            </div>
+            
+            @if($errors->any())
+                <div class="alert alert-danger py-2">
+                    @foreach($errors->all() as $error)
+                        <div><i class="ri-error-warning-line me-1"></i>{{ $error }}</div>
+                    @endforeach
                 </div>
+            @endif
+            
+            <form action="{{ route('register') }}" method="POST">
+                @csrf
+                
+                <div class="mb-3">
+                    <label class="form-label">Họ tên</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="ri-user-line"></i></span>
+                        <input type="text" name="name" class="form-control" placeholder="Nguyễn Văn A" value="{{ old('name') }}" required autofocus>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="ri-mail-line"></i></span>
+                        <input type="email" name="email" class="form-control" placeholder="you@example.com" value="{{ old('email') }}" required>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Giới tính</label>
+                    <div class="gender-options">
+                        <div class="gender-option">
+                            <input type="radio" name="gender" id="male" value="male" {{ old('gender') == 'male' ? 'checked' : '' }} required>
+                            <label for="male">
+                                <i class="ri-men-line me-1"></i> Nam
+                            </label>
+                        </div>
+                        <div class="gender-option">
+                            <input type="radio" name="gender" id="female" value="female" {{ old('gender') == 'female' ? 'checked' : '' }}>
+                            <label for="female">
+                                <i class="ri-women-line me-1"></i> Nữ
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Mật khẩu</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="ri-lock-line"></i></span>
+                        <input type="password" name="password" class="form-control" placeholder="Tối thiểu 8 ký tự" required>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="form-label">Xác nhận mật khẩu</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="ri-lock-2-line"></i></span>
+                        <input type="password" name="password_confirmation" class="form-control" placeholder="Nhập lại mật khẩu" required>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="ri-user-add-line me-1"></i> Đăng ký
+                </button>
+            </form>
+            
+            <div class="auth-footer">
+                Đã có tài khoản? <a href="{{ route('login') }}">Đăng nhập</a>
             </div>
         </div>
-    </section>
-</div>
-
-<script src="{{ asset('template_assets/js/libs.min.js') }}"></script>
-<script src="{{ asset('template_assets/js/slider.js') }}"></script>
-<script src="{{ asset('template_assets/js/masonry.pkgd.min.js') }}"></script>
-<script src="{{ asset('template_assets/js/enchanter.js') }}"></script>
-<script src="{{ asset('template_assets/js/sweetalert.js') }}"></script>
-<script src="{{ asset('template_assets/js/charts/weather-chart.js') }}"></script>
-<script src="{{ asset('template_assets/js/app.js') }}"></script>
-<script src="{{ asset('template_assets/vendor/vanillajs-datepicker/dist/js/datepicker.min.js') }}"></script>
-<script src="{{ asset('template_assets/js/lottie.js') }}"></script>
+    </div>
+</body>
+</html>
