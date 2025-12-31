@@ -14,13 +14,28 @@
                                     <li><a href="#"><i class="ri-settings-4-line"></i></a></li>
                                 </ul>
                             </div>
-                            <div class="user-detail text-center mb-3">
-                                <div class="profile-img">
-                                    <img src="https://avatars.fastly.steamstatic.com/79d0a512c5512bf571c21ed9af845382cc595543_full.jpg"
-                                        alt="profile-img" class="avatar-130 img-fluid" />
+                            <div class="user-detail text-center mb-3" style="position: relative; z-index: 10;">
+                                <div class="profile-img position-relative d-inline-block">
+                                    @if(Auth::user()->avatar)
+                                        <img src="{{ asset('storage/' . Auth::user()->avatar) }}"
+                                            alt="profile-img" class="avatar-130 img-fluid rounded-circle" style="width: 130px; height: 130px; object-fit: cover;" />
+                                    @else
+                                        <img src="{{ asset('template_assets/images/user/01.jpg') }}"
+                                            alt="profile-img" class="avatar-130 img-fluid rounded-circle" style="width: 130px; height: 130px; object-fit: cover;" />
+                                    @endif
+                                    <button type="button" class="btn btn-sm btn-primary position-absolute" 
+                                        style="bottom: 5px; right: 5px; border-radius: 50%; width: 36px; height: 36px; z-index: 20;"
+                                        data-bs-toggle="modal" data-bs-target="#changeAvatarModal">
+                                        <i class="ri-camera-line"></i>
+                                    </button>
                                 </div>
-                                <div class="profile-detail">
-                                    <h3 class="">{{ Auth::user()->name }}</h3>
+                                <div class="profile-detail mt-3">
+                                    <h3 class="d-inline-block mb-0">{{ Auth::user()->name }}</h3>
+                                    <button type="button" class="btn btn-sm btn-outline-primary ms-2" 
+                                        style="z-index: 20; position: relative;"
+                                        data-bs-toggle="modal" data-bs-target="#changeNameModal">
+                                        <i class="ri-edit-line"></i> Đổi tên
+                                    </button>
                                 </div>
                             </div>
                             <div
@@ -641,6 +656,115 @@
             {{-- <div class="col-sm-12 text-center">
          <img src="{{ asset('template_assets/images/page-img/page-load-loader.gif')}}" alt="loader" style="height: 100px;">
       </div> --}}
+    </div>
+
+    {{-- Modal Đổi Tên --}}
+    <div class="modal fade" id="changeNameModal" tabindex="-1" aria-labelledby="changeNameModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-semibold" id="changeNameModalLabel">
+                        <i class="ri-edit-line me-2"></i>Đổi tên hiển thị
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{{ route('profile.updateName') }}" method="POST">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="name" class="form-label fw-semibold">Tên mới</label>
+                            <input type="text" class="form-control form-control-lg" name="name" id="name" 
+                                value="{{ Auth::user()->name }}" required maxlength="255" 
+                                placeholder="Nhập tên hiển thị mới">
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="ri-check-line me-1"></i>Lưu thay đổi
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
+
+    {{-- Modal Đổi Avatar --}}
+    <div class="modal fade" id="changeAvatarModal" tabindex="-1" aria-labelledby="changeAvatarModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-semibold" id="changeAvatarModalLabel">
+                        <i class="ri-camera-line me-2"></i>Đổi ảnh đại diện
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{{ route('profile.updateAvatar') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="text-center mb-3">
+                            <div class="avatar-preview mb-3">
+                                @if(Auth::user()->avatar)
+                                    <img src="{{ asset('storage/' . Auth::user()->avatar) }}" id="avatarPreview"
+                                        class="rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
+                                @else
+                                    <img src="{{ asset('template_assets/images/user/01.jpg') }}" id="avatarPreview"
+                                        class="rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
+                                @endif
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="avatar" class="form-label fw-semibold">Chọn ảnh mới</label>
+                            <input type="file" class="form-control" name="avatar" id="avatar" 
+                                accept="image/jpeg,image/png,image/jpg,image/gif,image/webp" required>
+                            <small class="text-muted">Hỗ trợ: JPEG, PNG, GIF, WebP. Tối đa 5MB.</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="ri-upload-2-line me-1"></i>Tải lên
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {{-- Thông báo --}}
+    @if(session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                alert('{{ session('success') }}');
+            });
+        </script>
+    @endif
+    @if(session('error'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                alert('{{ session('error') }}');
+            });
+        </script>
+    @endif
+
+    {{-- Script preview avatar --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const avatarInput = document.getElementById('avatar');
+            const avatarPreview = document.getElementById('avatarPreview');
+            
+            if (avatarInput && avatarPreview) {
+                avatarInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            avatarPreview.src = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+        });
+    </script>
 @endsection
