@@ -14,47 +14,66 @@
     
     .left-sidebar, .right-sidebar {
         position: sticky;
-        top: 85px;
+        top: 90px;
         height: fit-content;
     }
     
     /* Sidebar Card */
     .sidebar-card {
-        background: var(--bg-card);
+        background: rgba(255,255,255,0.9);
+        backdrop-filter: blur(10px);
         border-radius: var(--radius-lg);
         padding: 1.25rem;
         margin-bottom: 1rem;
-        box-shadow: var(--shadow-sm);
-        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-md);
+        border: none;
+        transition: all 0.3s ease;
+    }
+    
+    .sidebar-card:hover {
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-2px);
     }
     
     .sidebar-card h6 {
-        font-weight: 600;
+        font-weight: 700;
         margin-bottom: 1rem;
-        color: var(--text-primary);
         display: flex;
         align-items: center;
         gap: 0.5rem;
     }
     
-    .sidebar-card h6 i { color: var(--primary); }
+    .sidebar-card h6 i { 
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 1.1rem;
+    }
     
     /* User Card */
-    .user-card { text-align: center; }
+    .user-card { 
+        text-align: center;
+        background: linear-gradient(180deg, rgba(99, 102, 241, 0.08) 0%, rgba(255,255,255,0.9) 40%);
+    }
     
     .user-card .user-avatar {
-        width: 70px;
-        height: 70px;
+        width: 75px;
+        height: 75px;
         border-radius: 50%;
         object-fit: cover;
         margin-bottom: 0.75rem;
-        border: 3px solid var(--border-color);
+        border: 4px solid transparent;
+        background: linear-gradient(white, white) padding-box, var(--gradient-primary) border-box;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
     }
     
     .user-card .user-name {
-        font-weight: 600;
-        font-size: 1rem;
+        font-weight: 700;
+        font-size: 1.05rem;
         margin-bottom: 0.25rem;
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
     }
     
     .user-card .user-email {
@@ -98,20 +117,20 @@
     }
     
     .trending-item .trend-rank {
-        width: 22px;
-        height: 22px;
+        width: 24px;
+        height: 24px;
         border-radius: 50%;
-        background: var(--bg-main);
+        background: var(--gradient-primary);
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 0.7rem;
-        font-weight: 600;
-        color: var(--text-muted);
+        font-weight: 700;
+        color: white;
     }
     
     .trending-item .trend-topic {
-        font-weight: 600;
+        font-weight: 700;
         font-size: 0.85rem;
         color: var(--text-primary);
     }
@@ -123,12 +142,13 @@
     
     /* Stories */
     .stories-section {
-        background: var(--bg-card);
+        background: rgba(255,255,255,0.9);
+        backdrop-filter: blur(10px);
         border-radius: var(--radius-lg);
         padding: 1rem;
         margin-bottom: 1rem;
-        box-shadow: var(--shadow-sm);
-        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-md);
+        border: none;
     }
     
     .stories-container {
@@ -141,23 +161,36 @@
     .story-item {
         flex-shrink: 0;
         text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .story-item:hover {
+        transform: scale(1.05);
     }
     
     .story-item .story-avatar {
-        width: 56px;
-        height: 56px;
+        width: 60px;
+        height: 60px;
         border-radius: 50%;
         object-fit: cover;
-        border: 3px solid var(--primary);
+        border: 3px solid transparent;
+        background: linear-gradient(white, white) padding-box, var(--gradient-primary) border-box;
         padding: 2px;
-        background: white;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+        transition: all 0.3s ease;
+    }
+    
+    .story-item:hover .story-avatar {
+        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
     }
     
     .story-item .story-name {
         font-size: 0.7rem;
+        font-weight: 600;
         color: var(--text-secondary);
-        margin-top: 0.25rem;
-        max-width: 56px;
+        margin-top: 0.35rem;
+        max-width: 60px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -165,19 +198,27 @@
     
     /* Create Post */
     .create-post-card {
-        background: var(--bg-card);
+        background: rgba(255,255,255,0.95);
+        backdrop-filter: blur(10px);
         border-radius: var(--radius-lg);
         padding: 1.25rem;
         margin-bottom: 1rem;
-        box-shadow: var(--shadow-sm);
-        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-md);
+        border: none;
+        transition: all 0.3s ease;
+    }
+    
+    .create-post-card:focus-within {
+        box-shadow: var(--shadow-lg), 0 0 0 3px rgba(99, 102, 241, 0.1);
     }
     
     .create-post-card .avatar {
-        width: 42px;
-        height: 42px;
+        width: 44px;
+        height: 44px;
         border-radius: 50%;
         object-fit: cover;
+        border: 2px solid transparent;
+        background: linear-gradient(white, white) padding-box, var(--gradient-primary) border-box;
     }
     
     .create-post-card textarea {
@@ -196,49 +237,60 @@
     
     .upload-btn {
         flex: 1;
-        min-width: 100px;
-        background: var(--bg-main);
-        border: 1px dashed var(--border-color);
+        min-width: 90px;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(236, 72, 153, 0.05) 100%);
+        border: 2px dashed rgba(99, 102, 241, 0.3);
         border-radius: var(--radius-sm);
         padding: 0.6rem;
         cursor: pointer;
-        transition: all 0.2s;
+        transition: all 0.3s;
         text-align: center;
         font-size: 0.85rem;
+        font-weight: 500;
     }
     .upload-btn:hover {
         border-color: var(--primary);
-        background: rgba(59, 130, 246, 0.05);
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(236, 72, 153, 0.1) 100%);
+        transform: translateY(-1px);
     }
     
     /* Post Card */
     .post-card {
-        background: var(--bg-card);
+        background: rgba(255,255,255,0.95);
+        backdrop-filter: blur(10px);
         border-radius: var(--radius-lg);
         margin-bottom: 1rem;
-        box-shadow: var(--shadow-sm);
-        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-md);
+        border: none;
         overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .post-card:hover {
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-2px);
     }
     
     .post-header {
-        padding: 0.875rem 1rem;
+        padding: 1rem 1.25rem;
         display: flex;
         align-items: center;
         gap: 0.75rem;
     }
     
     .post-header .avatar {
-        width: 40px;
-        height: 40px;
+        width: 44px;
+        height: 44px;
         border-radius: 50%;
         object-fit: cover;
+        border: 2px solid transparent;
+        background: linear-gradient(white, white) padding-box, var(--gradient-secondary) border-box;
     }
     
     .post-header .user-info h6 {
         margin: 0;
-        font-weight: 600;
-        font-size: 0.9rem;
+        font-weight: 700;
+        font-size: 0.95rem;
     }
     
     .post-header .user-info small {
@@ -492,6 +544,22 @@
         @forelse($posts as $post)
             @if($post)
             <article class="post-card" data-feed-id="{{ $post->feed_id ?? '' }}" data-post-id="{{ $post->id }}">
+                {{-- Category Badge on Top --}}
+                @if($post->category)
+                    @php
+                        $categoryColors = [
+                            'Giáo dục' => 'background: linear-gradient(135deg, #10B981, #14B8A6);',
+                            'Chính trị' => 'background: linear-gradient(135deg, #6366F1, #8B5CF6);',
+                            'Y tế' => 'background: linear-gradient(135deg, #EF4444, #EC4899);',
+                            'Khác' => 'background: linear-gradient(135deg, #F59E0B, #F97316);',
+                        ];
+                        $bgStyle = $categoryColors[$post->category] ?? 'background: #64748B;';
+                    @endphp
+                    <div style="padding: 0.5rem 1rem; {{ $bgStyle }} color: white; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; gap: 0.35rem;">
+                        <i class="ri-folder-line"></i> {{ $post->category }}
+                    </div>
+                @endif
+                
                 <div class="post-header">
                     @if($post->user && $post->user->avatar)
                         <img src="{{ asset('storage/' . $post->user->avatar) }}" class="avatar" alt="">
