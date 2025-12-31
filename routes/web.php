@@ -36,8 +36,8 @@ Route::post('/share-to-profile/{post}', [HomeController::class, 'shareToProfile'
 Route::post('/like/{post}', [HomeController::class, 'toggleLike'])->name('post.like')->middleware('auth');
 Route::post('/delete-share/{post}', [HomeController::class, 'deleteShare'])->name('post.deleteShare')->middleware('auth');
 
-// web.php
-Route::post('/feed/update-duration', [HomeController::class, 'updateDuration'])->name('feed.updateDuration');
+// Feed duration tracking
+Route::post('/feed/update-duration', [HomeController::class, 'updateDuration'])->name('feed.updateDuration')->middleware('auth');
 
 // Route::get('/', function () {
 //     return view('welcome');

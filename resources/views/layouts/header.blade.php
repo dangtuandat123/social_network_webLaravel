@@ -90,14 +90,38 @@
 </nav>
 
 {{-- Spacer --}}
-<div style="height: 75px;"></div>
+<div class="nav-spacer"></div>
 
 <style>
-    .nav-link { color: var(--text-secondary); }
-    .nav-link:hover { color: var(--primary); }
+    .nav-spacer { height: 70px; }
+    .nav-link { color: #64748B; transition: color 0.2s; }
+    .nav-link:hover { color: #6366F1; }
     .active-nav { 
         background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(236, 72, 153, 0.1) 100%); 
-        color: var(--primary) !important; 
+        color: #6366F1 !important; 
     }
     .dropdown-item:hover { background: rgba(99, 102, 241, 0.08); }
+    
+    @media (max-width: 768px) {
+        .nav-spacer { height: 60px; }
+        .navbar { padding: 0.5rem 0; }
+        .navbar-brand { font-size: 1.25rem !important; }
+        .navbar-brand > div:first-child { 
+            width: 32px !important; 
+            height: 32px !important; 
+            border-radius: 10px !important;
+        }
+        .navbar-brand i { font-size: 1.1rem !important; }
+        .nav-link { font-size: 0.9rem; padding: 0.5rem 0.75rem !important; }
+        .dropdown-toggle img, .dropdown-toggle .rounded-circle { 
+            width: 36px !important; 
+            height: 36px !important; 
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .nav-spacer { height: 55px; }
+        .navbar-brand span { display: none; }
+        .nav-item .nav-link span { display: none; }
+    }
 </style>

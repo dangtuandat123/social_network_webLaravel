@@ -374,8 +374,117 @@
     }
     
     @media (max-width: 768px) {
-        .home-layout { grid-template-columns: 1fr; max-width: 550px; }
+        .home-layout { 
+            grid-template-columns: 1fr; 
+            max-width: 100%; 
+            padding: 0.75rem;
+            gap: 0.75rem;
+        }
         .left-sidebar { display: none; }
+        
+        .stories-section {
+            border-radius: 0;
+            margin: 0 -0.75rem 0.75rem;
+            padding: 0.75rem;
+        }
+        
+        .create-post-card {
+            border-radius: 12px;
+            padding: 1rem;
+        }
+        
+        .create-post-card .avatar {
+            width: 38px;
+            height: 38px;
+        }
+        
+        .upload-actions {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+        }
+        
+        .upload-btn {
+            min-width: 70px;
+            padding: 0.5rem;
+            font-size: 0.75rem;
+        }
+        
+        .post-card {
+            border-radius: 12px;
+        }
+        
+        .post-header {
+            padding: 0.75rem;
+        }
+        
+        .post-header .avatar {
+            width: 38px;
+            height: 38px;
+        }
+        
+        .post-header .user-info h6 {
+            font-size: 0.9rem;
+        }
+        
+        .post-content {
+            padding: 0 0.75rem 0.75rem;
+        }
+        
+        .post-content p {
+            font-size: 0.9rem;
+        }
+        
+        .post-actions {
+            padding: 0.5rem 0.75rem;
+        }
+        
+        .post-actions .action-btn {
+            font-size: 0.8rem;
+            padding: 0.4rem;
+        }
+        
+        .post-actions .action-btn i {
+            font-size: 1rem;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .home-layout {
+            padding: 0.5rem;
+        }
+        
+        .stories-section {
+            margin: 0 -0.5rem 0.5rem;
+        }
+        
+        .story-item .story-avatar {
+            width: 50px;
+            height: 50px;
+        }
+        
+        .story-item .story-name {
+            max-width: 50px;
+            font-size: 0.65rem;
+        }
+        
+        .create-post-card textarea {
+            font-size: 0.9rem;
+        }
+        
+        .upload-btn {
+            min-width: 60px;
+            font-size: 0.7rem;
+        }
+        
+        .form-select {
+            font-size: 0.8rem;
+            padding: 0.4rem 0.6rem;
+        }
+        
+        .btn-primary.btn-sm {
+            font-size: 0.85rem;
+            padding: 0.5rem 1rem;
+        }
     }
 </style>
 
@@ -741,9 +850,32 @@ document.addEventListener('DOMContentLoaded', function() {
         input.addEventListener('change', function() {
             const label = this.closest('label');
             if (this.files.length > 0) {
-                label.style.borderColor = 'var(--primary)';
-                label.style.background = 'rgba(59, 130, 246, 0.1)';
+                label.style.borderColor = '#6366F1';
+                label.style.background = '#EEF2FF';
             }
+        });
+    });
+    
+    // Video autoplay on scroll (muted để trình duyệt cho phép autoplay)
+    const videoObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            const video = entry.target;
+            if (entry.isIntersecting) {
+                video.play().catch(() => {});
+            } else {
+                video.pause();
+            }
+        });
+    }, { threshold: 0.5 });
+    
+    document.querySelectorAll('.post-media video').forEach(video => {
+        // Muted để autoplay hoạt động
+        video.muted = true;
+        videoObserver.observe(video);
+        
+        // Click vào video để bật/tắt âm thanh
+        video.addEventListener('click', function() {
+            this.muted = !this.muted;
         });
     });
     
