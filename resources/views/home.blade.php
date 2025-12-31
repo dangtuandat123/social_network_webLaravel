@@ -570,7 +570,7 @@
         {{-- Create Post --}}
         @if(Auth::check() && Auth::user()->level == 1)
             <div class="create-post-card">
-                <form action="{{ route('post.store') }}" method="POST" enctype="multipart/form-data">
+                <form action="{{ route('post.store') }}" method="POST" enctype="multipart/form-data" id="createPostForm">
                     @csrf
                     <input type="hidden" name="useridpost" value="{{ Auth::id() }}">
                     
@@ -583,14 +583,41 @@
                         <textarea name="title" class="form-control" rows="2" placeholder="Bạn đang nghĩ gì?" required></textarea>
                     </div>
                     
+                    {{-- Image Preview Container --}}
+                    <div id="imagePreviewContainer" class="mb-3" style="display: none;">
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="imagePreviews"></div>
+                        <button type="button" id="clearImages" class="btn btn-outline-danger btn-sm mt-2">
+                            <i class="ri-close-line"></i> Xóa tất cả ảnh
+                        </button>
+                    </div>
+                    
+                    {{-- Video Preview Container --}}
+                    <div id="videoPreviewContainer" class="mb-3" style="display: none;">
+                        <div id="videoPreviews"></div>
+                        <button type="button" id="clearVideos" class="btn btn-outline-danger btn-sm mt-2">
+                            <i class="ri-close-line"></i> Xóa tất cả video
+                        </button>
+                    </div>
+                    
+                    {{-- Upload Progress Bar --}}
+                    <div id="uploadProgress" class="mb-3" style="display: none;">
+                        <div class="d-flex justify-content-between mb-1">
+                            <small style="font-weight: 600;">Đang tải lên...</small>
+                            <small id="progressPercent">0%</small>
+                        </div>
+                        <div style="height: 8px; background: #E2E8F0; border-radius: 4px; overflow: hidden;">
+                            <div id="progressBar" style="height: 100%; width: 0%; background: linear-gradient(90deg, #6366F1, #EC4899); transition: width 0.3s;"></div>
+                        </div>
+                    </div>
+                    
                     <div class="upload-actions mb-3">
-                        <label class="upload-btn">
-                            <i class="ri-image-line" style="color: var(--success);"></i> Ảnh
-                            <input type="file" name="list_img[]" multiple accept="image/*" class="d-none">
+                        <label class="upload-btn" id="imageUploadBtn">
+                            <i class="ri-image-line" style="color: #10B981;"></i> Ảnh
+                            <input type="file" name="list_img[]" multiple accept="image/*" class="d-none" id="imageInput">
                         </label>
-                        <label class="upload-btn">
-                            <i class="ri-video-line" style="color: var(--danger);"></i> Video
-                            <input type="file" name="list_video[]" multiple accept="video/*" class="d-none">
+                        <label class="upload-btn" id="videoUploadBtn">
+                            <i class="ri-video-line" style="color: #EF4444;"></i> Video
+                            <input type="file" name="list_video[]" multiple accept="video/*" class="d-none" id="videoInput">
                         </label>
                         <select name="category" class="form-select form-select-sm" style="flex: 1.5;" required>
                             <option value="">Danh mục</option>
@@ -606,7 +633,7 @@
                         </select>
                     </div>
                     
-                    <button type="submit" class="btn btn-primary w-100 btn-sm">
+                    <button type="submit" class="btn btn-primary w-100 btn-sm" id="submitBtn">
                         <i class="ri-send-plane-line me-1"></i> Đăng bài
                     </button>
                 </form>
@@ -845,16 +872,138 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // File upload feedback
-    document.querySelectorAll('.upload-btn input[type="file"]').forEach(input => {
-        input.addEventListener('change', function() {
-            const label = this.closest('label');
+    // Image Preview
+    const imageInput = document.getElementById('imageInput');
+    const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+    const imagePreviews = document.getElementById('imagePreviews');
+    const clearImages = document.getElementById('clearImages');
+    
+    if (imageInput) {
+        imageInput.addEventListener('change', function() {
+            imagePreviews.innerHTML = '';
             if (this.files.length > 0) {
-                label.style.borderColor = '#6366F1';
-                label.style.background = '#EEF2FF';
+                imagePreviewContainer.style.display = 'block';
+                Array.from(this.files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.style.cssText = 'width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 2px solid #E2E8F0;';
+                        imagePreviews.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                });
+                document.getElementById('imageUploadBtn').style.borderColor = '#10B981';
+                document.getElementById('imageUploadBtn').style.background = '#ECFDF5';
+            } else {
+                imagePreviewContainer.style.display = 'none';
             }
         });
-    });
+        
+        if (clearImages) {
+            clearImages.addEventListener('click', function() {
+                imageInput.value = '';
+                imagePreviews.innerHTML = '';
+                imagePreviewContainer.style.display = 'none';
+                document.getElementById('imageUploadBtn').style.borderColor = '';
+                document.getElementById('imageUploadBtn').style.background = '';
+            });
+        }
+    }
+    
+    // Video Preview
+    const videoInput = document.getElementById('videoInput');
+    const videoPreviewContainer = document.getElementById('videoPreviewContainer');
+    const videoPreviews = document.getElementById('videoPreviews');
+    const clearVideos = document.getElementById('clearVideos');
+    
+    if (videoInput) {
+        videoInput.addEventListener('change', function() {
+            videoPreviews.innerHTML = '';
+            if (this.files.length > 0) {
+                videoPreviewContainer.style.display = 'block';
+                Array.from(this.files).forEach((file, index) => {
+                    const div = document.createElement('div');
+                    div.style.cssText = 'display: flex; align-items: center; gap: 10px; padding: 8px; background: #F8FAFC; border-radius: 8px; margin-bottom: 6px;';
+                    div.innerHTML = `
+                        <i class="ri-video-line" style="color: #EF4444; font-size: 1.25rem;"></i>
+                        <div style="flex: 1;">
+                            <div style="font-size: 0.85rem; font-weight: 500;">${file.name}</div>
+                            <small style="color: #94A3B8;">${(file.size / (1024 * 1024)).toFixed(2)} MB</small>
+                        </div>
+                    `;
+                    videoPreviews.appendChild(div);
+                });
+                document.getElementById('videoUploadBtn').style.borderColor = '#EF4444';
+                document.getElementById('videoUploadBtn').style.background = '#FEF2F2';
+            } else {
+                videoPreviewContainer.style.display = 'none';
+            }
+        });
+        
+        if (clearVideos) {
+            clearVideos.addEventListener('click', function() {
+                videoInput.value = '';
+                videoPreviews.innerHTML = '';
+                videoPreviewContainer.style.display = 'none';
+                document.getElementById('videoUploadBtn').style.borderColor = '';
+                document.getElementById('videoUploadBtn').style.background = '';
+            });
+        }
+    }
+    
+    // Form Submit with Progress
+    const createPostForm = document.getElementById('createPostForm');
+    if (createPostForm) {
+        createPostForm.addEventListener('submit', function(e) {
+            const hasVideo = videoInput && videoInput.files.length > 0;
+            
+            if (hasVideo) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const xhr = new XMLHttpRequest();
+                const progressDiv = document.getElementById('uploadProgress');
+                const progressBar = document.getElementById('progressBar');
+                const progressPercent = document.getElementById('progressPercent');
+                const submitBtn = document.getElementById('submitBtn');
+                
+                progressDiv.style.display = 'block';
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="ri-loader-4-line me-1"></i> Đang tải...';
+                
+                xhr.upload.addEventListener('progress', function(e) {
+                    if (e.lengthComputable) {
+                        const percent = Math.round((e.loaded / e.total) * 100);
+                        progressBar.style.width = percent + '%';
+                        progressPercent.textContent = percent + '%';
+                    }
+                });
+                
+                xhr.addEventListener('load', function() {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        window.location.href = '/home';
+                    } else {
+                        alert('Đăng bài thất bại. Vui lòng thử lại.');
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<i class="ri-send-plane-line me-1"></i> Đăng bài';
+                        progressDiv.style.display = 'none';
+                    }
+                });
+                
+                xhr.addEventListener('error', function() {
+                    alert('Lỗi kết nối. Vui lòng thử lại.');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="ri-send-plane-line me-1"></i> Đăng bài';
+                    progressDiv.style.display = 'none';
+                });
+                
+                xhr.open('POST', this.action);
+                xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]').content);
+                xhr.send(formData);
+            }
+        });
+    }
     
     // Video autoplay on scroll (muted để trình duyệt cho phép autoplay)
     const videoObserver = new IntersectionObserver((entries) => {
