@@ -18,21 +18,14 @@
         height: fit-content;
     }
     
-    /* Sidebar Card */
+    /* Sidebar Card - Optimized */
     .sidebar-card {
-        background: rgba(255,255,255,0.9);
-        backdrop-filter: blur(10px);
-        border-radius: var(--radius-lg);
+        background: #fff;
+        border-radius: 16px;
         padding: 1.25rem;
         margin-bottom: 1rem;
-        box-shadow: var(--shadow-md);
-        border: none;
-        transition: all 0.3s ease;
-    }
-    
-    .sidebar-card:hover {
-        box-shadow: var(--shadow-lg);
-        transform: translateY(-2px);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        border: 1px solid #E2E8F0;
     }
     
     .sidebar-card h6 {
@@ -41,39 +34,34 @@
         display: flex;
         align-items: center;
         gap: 0.5rem;
+        color: #1E293B;
     }
     
     .sidebar-card h6 i { 
-        background: var(--gradient-primary);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        color: #6366F1;
         font-size: 1.1rem;
     }
     
     /* User Card */
     .user-card { 
         text-align: center;
-        background: linear-gradient(180deg, rgba(99, 102, 241, 0.08) 0%, rgba(255,255,255,0.9) 40%);
+        background: linear-gradient(180deg, #EEF2FF 0%, #fff 50%);
     }
     
     .user-card .user-avatar {
-        width: 75px;
-        height: 75px;
+        width: 70px;
+        height: 70px;
         border-radius: 50%;
         object-fit: cover;
         margin-bottom: 0.75rem;
-        border: 4px solid transparent;
-        background: linear-gradient(white, white) padding-box, var(--gradient-primary) border-box;
-        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
+        border: 3px solid #6366F1;
     }
     
     .user-card .user-name {
         font-weight: 700;
-        font-size: 1.05rem;
+        font-size: 1rem;
         margin-bottom: 0.25rem;
-        background: var(--gradient-primary);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        color: #6366F1;
     }
     
     .user-card .user-email {
@@ -132,23 +120,22 @@
     .trending-item .trend-topic {
         font-weight: 700;
         font-size: 0.85rem;
-        color: var(--text-primary);
+        color: #1E293B;
     }
     
     .trending-item .trend-posts {
         font-size: 0.7rem;
-        color: var(--text-muted);
+        color: #94A3B8;
     }
     
-    /* Stories */
+    /* Stories - Optimized */
     .stories-section {
-        background: rgba(255,255,255,0.9);
-        backdrop-filter: blur(10px);
-        border-radius: var(--radius-lg);
+        background: #fff;
+        border-radius: 16px;
         padding: 1rem;
         margin-bottom: 1rem;
-        box-shadow: var(--shadow-md);
-        border: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        border: 1px solid #E2E8F0;
     }
     
     .stories-container {
@@ -162,54 +149,41 @@
         flex-shrink: 0;
         text-align: center;
         cursor: pointer;
-        transition: all 0.3s ease;
-    }
-    
-    .story-item:hover {
-        transform: scale(1.05);
     }
     
     .story-item .story-avatar {
-        width: 60px;
-        height: 60px;
+        width: 58px;
+        height: 58px;
         border-radius: 50%;
         object-fit: cover;
-        border: 3px solid transparent;
-        background: linear-gradient(white, white) padding-box, var(--gradient-primary) border-box;
+        border: 3px solid #6366F1;
         padding: 2px;
-        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
-        transition: all 0.3s ease;
-    }
-    
-    .story-item:hover .story-avatar {
-        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        background: white;
     }
     
     .story-item .story-name {
         font-size: 0.7rem;
         font-weight: 600;
-        color: var(--text-secondary);
+        color: #64748B;
         margin-top: 0.35rem;
-        max-width: 60px;
+        max-width: 58px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
     
-    /* Create Post */
+    /* Create Post - Optimized */
     .create-post-card {
-        background: rgba(255,255,255,0.95);
-        backdrop-filter: blur(10px);
-        border-radius: var(--radius-lg);
+        background: #fff;
+        border-radius: 16px;
         padding: 1.25rem;
         margin-bottom: 1rem;
-        box-shadow: var(--shadow-md);
-        border: none;
-        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        border: 1px solid #E2E8F0;
     }
     
     .create-post-card:focus-within {
-        box-shadow: var(--shadow-lg), 0 0 0 3px rgba(99, 102, 241, 0.1);
+        border-color: #6366F1;
     }
     
     .create-post-card .avatar {
@@ -238,53 +212,43 @@
     .upload-btn {
         flex: 1;
         min-width: 90px;
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(236, 72, 153, 0.05) 100%);
-        border: 2px dashed rgba(99, 102, 241, 0.3);
-        border-radius: var(--radius-sm);
+        background: #F8FAFC;
+        border: 1px dashed #CBD5E1;
+        border-radius: 10px;
         padding: 0.6rem;
         cursor: pointer;
-        transition: all 0.3s;
         text-align: center;
         font-size: 0.85rem;
         font-weight: 500;
     }
     .upload-btn:hover {
-        border-color: var(--primary);
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(236, 72, 153, 0.1) 100%);
-        transform: translateY(-1px);
+        border-color: #6366F1;
+        background: #EEF2FF;
     }
     
-    /* Post Card */
+    /* Post Card - Optimized */
     .post-card {
-        background: rgba(255,255,255,0.95);
-        backdrop-filter: blur(10px);
-        border-radius: var(--radius-lg);
+        background: #fff;
+        border-radius: 16px;
         margin-bottom: 1rem;
-        box-shadow: var(--shadow-md);
-        border: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        border: 1px solid #E2E8F0;
         overflow: hidden;
-        transition: all 0.3s ease;
-    }
-    
-    .post-card:hover {
-        box-shadow: var(--shadow-lg);
-        transform: translateY(-2px);
     }
     
     .post-header {
-        padding: 1rem 1.25rem;
+        padding: 0.875rem 1rem;
         display: flex;
         align-items: center;
         gap: 0.75rem;
     }
     
     .post-header .avatar {
-        width: 44px;
-        height: 44px;
+        width: 42px;
+        height: 42px;
         border-radius: 50%;
         object-fit: cover;
-        border: 2px solid transparent;
-        background: linear-gradient(white, white) padding-box, var(--gradient-secondary) border-box;
+        border: 2px solid #6366F1;
     }
     
     .post-header .user-info h6 {
