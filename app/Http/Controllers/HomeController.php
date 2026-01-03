@@ -84,12 +84,7 @@ class HomeController extends Controller
             'lesson_number' => 'nullable|integer|in:1,2,3',
         ]);
 
-        // Kiểm tra phải có ít nhất ảnh hoặc video
-        if (!$request->hasFile('list_img') && !$request->hasFile('list_video')) {
-            return redirect()->back()->withErrors(['media' => 'Vui lòng tải lên ít nhất một hình ảnh hoặc video.']);
-        }
-
-        // Upload ảnh
+        // Upload ảnh (không bắt buộc)
         $imagePaths = [];
         if ($request->hasFile('list_img')) {
             foreach ($request->file('list_img') as $image) {

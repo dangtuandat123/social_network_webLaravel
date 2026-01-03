@@ -264,6 +264,8 @@
     
     .post-content {
         padding: 0 1rem 0.875rem;
+        max-width: 100%;
+        overflow: hidden;
     }
     
     .post-content .post-title {
@@ -277,6 +279,9 @@
         font-size: 0.9rem;
         color: #475569;
         white-space: pre-line;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        word-break: break-all;
     }
     
     .see-more-btn {
@@ -342,21 +347,30 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 0.4rem;
-        padding: 0.5rem;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
         border: none;
-        background: transparent;
-        border-radius: var(--radius-sm);
-        color: var(--text-secondary);
-        font-weight: 500;
-        font-size: 0.85rem;
+        background: #F1F5F9;
+        border-radius: 10px;
+        color: #475569;
+        font-weight: 600;
+        font-size: 0.9rem;
         cursor: pointer;
         transition: all 0.2s;
     }
     
-    .post-actions .action-btn:hover { background: var(--bg-main); }
-    .post-actions .action-btn.liked { color: #EF4444; }
-    .post-actions .action-btn i { font-size: 1.1rem; }
+    .post-actions .action-btn:hover { 
+        background: #E2E8F0;
+        transform: scale(1.02);
+    }
+    .post-actions .action-btn.liked { 
+        background: #FEE2E2;
+        color: #EF4444; 
+    }
+    .post-actions .action-btn.liked:hover { 
+        background: #FECACA;
+    }
+    .post-actions .action-btn i { font-size: 1.25rem; }
     
     /* Suggestions */
     .suggestion-item {
