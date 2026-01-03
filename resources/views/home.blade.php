@@ -591,14 +591,6 @@
                     <img src="{{ asset('template_assets/images/user/04.jpg') }}" class="story-avatar" alt="">
                     <div class="story-name">Thu Hà</div>
                 </div>
-                <div class="story-item">
-                    <img src="{{ asset('template_assets/images/user/05.jpg') }}" class="story-avatar" alt="">
-                    <div class="story-name">Văn Đức</div>
-                </div>
-                <div class="story-item">
-                    <img src="{{ asset('template_assets/images/user/01.jpg') }}" class="story-avatar" alt="">
-                    <div class="story-name">Lan Phương</div>
-                </div>
             </div>
         </div>
         
