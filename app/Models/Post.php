@@ -16,6 +16,7 @@ class Post extends Model
         'list_video',
         'useridpost',
         'category',
+        'lesson_number',
     ];
 
     // Nếu 'list_img' là JSON, bạn có thể muốn sử dụng cast

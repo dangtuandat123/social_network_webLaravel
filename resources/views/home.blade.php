@@ -657,12 +657,18 @@
                             <i class="ri-video-line" style="color: #EF4444;"></i> Video
                             <input type="file" name="list_video[]" multiple accept="video/*" class="d-none" id="videoInput">
                         </label>
-                        <select name="category" class="form-select form-select-sm" style="flex: 1.5;" required>
-                            <option value="">Danh mục</option>
+                        <select name="category" class="form-select form-select-sm" id="categorySelect" style="flex: 1.5;" required>
+                            <option value="" disabled selected>Danh mục</option>
                             <option value="Giáo dục">Giáo dục</option>
                             <option value="Chính trị">Chính trị</option>
                             <option value="Y tế">Y tế</option>
                             <option value="Khác">Khác</option>
+                        </select>
+                        <select name="lesson_number" class="form-select form-select-sm" id="lessonSelect" style="flex: 1; display: none;">
+                            <option value="" disabled selected>Bài</option>
+                            <option value="1">Bài 1</option>
+                            <option value="2">Bài 2</option>
+                            <option value="3">Bài 3</option>
                         </select>
                     </div>
                     
@@ -687,9 +693,10 @@
                             'Khác' => 'background: linear-gradient(135deg, #F59E0B, #F97316);',
                         ];
                         $bgStyle = $categoryColors[$post->category] ?? 'background: #64748B;';
+                        $lessonText = $post->lesson_number ? ' - Bài ' . $post->lesson_number : '';
                     @endphp
                     <div style="padding: 0.5rem 1rem; {{ $bgStyle }} color: white; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; gap: 0.35rem;">
-                        <i class="ri-folder-line"></i> {{ $post->category }}
+                        <i class="ri-folder-line"></i> {{ $post->category }}{{ $lessonText }}
                     </div>
                 @endif
                 
@@ -954,6 +961,21 @@ function toggleContent(postId) {
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Category change - Show/hide lesson select
+    const categorySelect = document.getElementById('categorySelect');
+    const lessonSelect = document.getElementById('lessonSelect');
+    
+    if (categorySelect && lessonSelect) {
+        categorySelect.addEventListener('change', function() {
+            if (this.value === 'Khác' || this.value === '') {
+                lessonSelect.style.display = 'none';
+                lessonSelect.value = '';
+            } else {
+                lessonSelect.style.display = 'block';
+            }
+        });
+    }
+    
     // Like
     document.querySelectorAll('.like-btn').forEach(btn => {
         btn.addEventListener('click', function() {

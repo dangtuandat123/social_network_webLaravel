@@ -81,6 +81,7 @@ class HomeController extends Controller
             'list_video.*' => 'mimetypes:video/mp4,video/webm,video/quicktime|max:512000', // 500MB
             'useridpost' => 'required|exists:users,id',
             'category' => 'required|string|in:Giáo dục,Chính trị,Y tế,Khác',
+            'lesson_number' => 'nullable|integer|in:1,2,3',
         ]);
 
         // Kiểm tra phải có ít nhất ảnh hoặc video
@@ -113,6 +114,7 @@ class HomeController extends Controller
         $post->list_video = !empty($videoPaths) ? implode(',', $videoPaths) : null;
         $post->useridpost = $request->input('useridpost');
         $post->category = $request->input('category');
+        $post->lesson_number = $request->input('lesson_number');
 
         $post->save();
 
