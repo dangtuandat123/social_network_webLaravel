@@ -891,7 +891,7 @@
         
         {{-- Footer --}}
         <div class="text-center" style="font-size: 0.7rem; color: var(--text-muted);">
-            <p class="mb-1">© 2024 Social Media</p>
+            <p class="mb-1">© 2026 Social Media</p>
             <a href="#" style="color: var(--text-muted);">Điều khoản</a> · 
             <a href="#" style="color: var(--text-muted);">Bảo mật</a>
         </div>
@@ -1112,10 +1112,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 
                 xhr.addEventListener('load', function() {
-                    if (xhr.status >= 200 && xhr.status < 300) {
-                        window.location.href = '/home';
+                    // Laravel redirect sẽ trả về 302 hoặc 200 với redirect
+                    // XHR tự động follow redirect nên status cuối sẽ là 200
+                    if (xhr.status >= 200 && xhr.status < 400) {
+                        window.location.reload();
                     } else {
-                        alert('Đăng bài thất bại. Vui lòng thử lại.');
+                        alert('Đăng bài thất bại. Vui lòng thử lại. Lỗi: ' + xhr.status);
                         submitBtn.disabled = false;
                         submitBtn.innerHTML = '<i class="ri-send-plane-line me-1"></i> Đăng bài';
                         progressDiv.style.display = 'none';
@@ -1131,6 +1133,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 xhr.open('POST', this.action);
                 xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]').content);
+                xhr.setRequestHeader('Accept', 'text/html');
                 xhr.send(formData);
             }
         });
