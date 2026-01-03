@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/', [HomeController::class, 'index']); // Redirect về home
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 
 Route::middleware(['guest'])->group(function () {

@@ -74,12 +74,12 @@ class HomeController extends Controller
         // Ảnh hoặc video phải có ít nhất 1 trong 2
         $request->validate([
             'title' => 'required|string|max:255',
+            'content' => 'nullable|string|max:5000',
             'list_img' => 'nullable|array',
             'list_img.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'list_video' => 'nullable|array',
             'list_video.*' => 'mimetypes:video/mp4,video/webm,video/quicktime|max:512000', // 500MB
             'useridpost' => 'required|exists:users,id',
-            'fakeorreal' => 'required|string|in:real,fake',
             'category' => 'required|string|in:Giáo dục,Chính trị,Y tế,Khác',
         ]);
 
@@ -108,10 +108,10 @@ class HomeController extends Controller
 
         $post = new Post();
         $post->title = $request->input('title');
+        $post->content = $request->input('content');
         $post->list_img = !empty($imagePaths) ? implode(',', $imagePaths) : null;
         $post->list_video = !empty($videoPaths) ? implode(',', $videoPaths) : null;
         $post->useridpost = $request->input('useridpost');
-        $post->fakeorreal = $request->input('fakeorreal');
         $post->category = $request->input('category');
 
         $post->save();

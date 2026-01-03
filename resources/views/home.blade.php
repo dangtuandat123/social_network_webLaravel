@@ -266,19 +266,54 @@
         padding: 0 1rem 0.875rem;
     }
     
-    .post-content p {
-        margin: 0;
-        line-height: 1.5;
-        font-size: 0.95rem;
+    .post-content .post-title {
+        margin: 0 0 0.5rem;
+        font-size: 1rem;
     }
     
-    .post-media img, .post-media video {
+    .post-content .post-text {
+        margin: 0;
+        line-height: 1.6;
+        font-size: 0.9rem;
+        color: #475569;
+        white-space: pre-line;
+    }
+    
+    .see-more-btn {
+        color: #6366F1;
+        font-weight: 600;
+        text-decoration: none;
+        margin-left: 0.25rem;
+    }
+    
+    .see-more-btn:hover {
+        text-decoration: underline;
+    }
+    
+    .post-media img {
         width: 100%;
-        max-height: 450px;
+        max-height: 500px;
         object-fit: cover;
     }
     
-    .post-media video { background: #000; }
+    /* Video portrait 9:16 */
+    .post-media video {
+        width: 100%;
+        max-height: 70vh;
+        object-fit: contain;
+        background: #000;
+    }
+    
+    .post-media.portrait-media {
+        display: flex;
+        justify-content: center;
+        background: #000;
+    }
+    
+    .post-media.portrait-media video {
+        max-width: 100%;
+        max-height: 75vh;
+    }
     
     .carousel-control-prev, .carousel-control-next {
         width: 36px;
@@ -580,7 +615,10 @@
                         @else
                             <img src="{{ asset('template_assets/images/user/01.jpg') }}" class="avatar" alt="">
                         @endif
-                        <textarea name="title" class="form-control" rows="2" placeholder="Bạn đang nghĩ gì?" required></textarea>
+                        <div class="flex-grow-1">
+                            <input type="text" name="title" class="form-control mb-2" placeholder="Tiêu đề bài viết" required style="font-weight: 600;">
+                            <textarea name="content" class="form-control" rows="2" placeholder="Nội dung chi tiết (không bắt buộc)"></textarea>
+                        </div>
                     </div>
                     
                     {{-- Image Preview Container --}}
@@ -625,11 +663,6 @@
                             <option value="Chính trị">Chính trị</option>
                             <option value="Y tế">Y tế</option>
                             <option value="Khác">Khác</option>
-                        </select>
-                        <select name="fakeorreal" class="form-select form-select-sm" style="flex: 1;" required>
-                            <option value="">Loại</option>
-                            <option value="real">Thật</option>
-                            <option value="fake">Giả</option>
                         </select>
                     </div>
                     
@@ -688,7 +721,22 @@
                 </div>
                 
                 <div class="post-content">
-                    <p>{{ $post->title }}</p>
+                    <p class="post-title"><strong>{{ $post->title }}</strong></p>
+                    @if($post->content)
+                        @php $contentLength = mb_strlen($post->content); @endphp
+                        @if($contentLength > 200)
+                            <p class="post-text" id="content-short-{{ $post->id }}">
+                                {{ Str::limit($post->content, 200) }}
+                                <a href="javascript:void(0)" class="see-more-btn" onclick="toggleContent({{ $post->id }})">Xem thêm</a>
+                            </p>
+                            <p class="post-text" id="content-full-{{ $post->id }}" style="display: none;">
+                                {{ $post->content }}
+                                <a href="javascript:void(0)" class="see-more-btn" onclick="toggleContent({{ $post->id }})">Thu gọn</a>
+                            </p>
+                        @else
+                            <p class="post-text">{{ $post->content }}</p>
+                        @endif
+                    @endif
                 </div>
                 
                 @if(!empty($post->list_img))
@@ -842,6 +890,67 @@
         </div>
     </aside>
 </div>
+
+{{-- Modal Đăng nhập cho Guest --}}
+@if(!Auth::check())
+<div class="modal fade" id="guestLoginModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border: none; border-radius: 20px; overflow: hidden;">
+            <div class="modal-body p-0">
+                {{-- Header --}}
+                <div style="background: linear-gradient(135deg, #6366F1 0%, #EC4899 100%); padding: 2rem; text-align: center;">
+                    <div style="width: 60px; height: 60px; background: white; border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
+                        <i class="ri-bubble-chart-fill" style="color: #6366F1; font-size: 1.75rem;"></i>
+                    </div>
+                    <h4 style="color: white; font-weight: 700; margin: 0;">Chào mừng đến Social!</h4>
+                    <p style="color: rgba(255,255,255,0.85); margin: 0.5rem 0 0; font-size: 0.95rem;">Đăng nhập để trải nghiệm đầy đủ</p>
+                </div>
+                
+                {{-- Content --}}
+                <div style="padding: 1.5rem 2rem 2rem;">
+                    <div class="d-grid gap-3">
+                        <a href="{{ route('login') }}" class="btn btn-primary btn-lg" style="border-radius: 12px; font-weight: 600; padding: 0.875rem;">
+                            <i class="ri-login-box-line me-2"></i> Đăng nhập
+                        </a>
+                        <a href="{{ route('register') }}" class="btn btn-outline-primary btn-lg" style="border-radius: 12px; font-weight: 600; padding: 0.875rem;">
+                            <i class="ri-user-add-line me-2"></i> Tạo tài khoản mới
+                        </a>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <button type="button" class="btn btn-link text-muted" data-bs-dismiss="modal" style="font-size: 0.9rem; text-decoration: none;">
+                            <i class="ri-eye-line me-1"></i> Xem trước không cần đăng nhập
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Hiện modal sau 2 giây
+    setTimeout(function() {
+        const modal = new bootstrap.Modal(document.getElementById('guestLoginModal'));
+        modal.show();
+    }, 2000);
+</script>
+@endif
+
+{{-- Toggle Content Function --}}
+<script>
+function toggleContent(postId) {
+    const shortEl = document.getElementById('content-short-' + postId);
+    const fullEl = document.getElementById('content-full-' + postId);
+    if (shortEl.style.display === 'none') {
+        shortEl.style.display = 'block';
+        fullEl.style.display = 'none';
+    } else {
+        shortEl.style.display = 'none';
+        fullEl.style.display = 'block';
+    }
+}
+</script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
