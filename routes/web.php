@@ -39,6 +39,9 @@ Route::post('/delete-share/{post}', [HomeController::class, 'deleteShare'])->nam
 // Feed duration tracking
 Route::post('/feed/update-duration', [HomeController::class, 'updateDuration'])->name('feed.updateDuration')->middleware('auth');
 
+// Infinite scroll - load more posts
+Route::get('/load-more', [HomeController::class, 'loadMore'])->name('posts.loadMore');
+
 // Route::get('/', function () {
 //     return view('welcome');
 // });

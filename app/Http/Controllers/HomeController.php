@@ -15,58 +15,80 @@ use Illuminate\Support\Facades\Cache;
 
 class HomeController extends Controller
 {
-    // Số posts per page - có thể điều chỉnh
-    private const POSTS_PER_PAGE = 10;
+    // Số posts per load - 6 bài mỗi lần
+    private const POSTS_PER_LOAD = 6;
 
     public function index(Request $request)
     {
-        $page = $request->get('page', 1);
+        $posts = $this->getPosts(0);
+        return view('home', compact('posts'));
+    }
+
+    /**
+     * API để load thêm posts (Infinite Scroll)
+     */
+    public function loadMore(Request $request)
+    {
+        $offset = $request->get('offset', 0);
+        $posts = $this->getPosts($offset);
         
+        // Trả về HTML của các posts
+        $html = '';
+        foreach ($posts as $post) {
+            $html .= view('partials.post-card', compact('post'))->render();
+        }
+        
+        return response()->json([
+            'html' => $html,
+            'hasMore' => $posts->count() >= self::POSTS_PER_LOAD,
+            'nextOffset' => $offset + $posts->count(),
+        ]);
+    }
+
+    /**
+     * Lấy posts theo offset
+     */
+    private function getPosts($offset)
+    {
         if (Auth::check()) {
             $userId = Auth::id();
             $userLevel = Auth::user()->level;
             
             if ($userLevel == 1) {
-                // Admin: cache danh sách posts trong 5 phút
-                $cacheKey = "admin_posts_page_{$page}";
-                $posts = Cache::remember($cacheKey, 300, function () {
-                    return Post::with('user')
-                        ->orderBy('id', 'desc')
-                        ->paginate(self::POSTS_PER_PAGE);
-                });
+                // Admin: lấy tất cả posts
+                return Post::with('user')
+                    ->orderBy('id', 'desc')
+                    ->skip($offset)
+                    ->take(self::POSTS_PER_LOAD)
+                    ->get();
             } else {
-                // User thường: lấy feed cá nhân với pagination
+                // User thường: lấy feed cá nhân
                 $feeds = Feed::with(['post.user'])
                     ->where('user_id', $userId)
                     ->orderBy('created_at', 'desc')
-                    ->paginate(self::POSTS_PER_PAGE);
+                    ->skip($offset)
+                    ->take(self::POSTS_PER_LOAD)
+                    ->get();
 
                 // Transform feeds thành posts với feed_id
-                $posts = $feeds->through(function ($feed) {
+                return $feeds->map(function ($feed) {
                     $post = $feed->post;
-                    
-                    if (!$post) {
-                        return null;
-                    }
+                    if (!$post) return null;
 
                     $postClone = clone $post;
                     $postClone->setAttribute('feed_id', $feed->id);
                     $postClone->setRelation('user', $post->user);
-
                     return $postClone;
-                })->filter();
+                })->filter()->values();
             }
         } else {
-            // Guest: cache danh sách posts trong 5 phút
-            $cacheKey = "guest_posts_page_{$page}";
-            $posts = Cache::remember($cacheKey, 300, function () {
-                return Post::with('user')
-                    ->orderBy('id', 'desc')
-                    ->paginate(self::POSTS_PER_PAGE);
-            });
+            // Guest: lấy tất cả posts
+            return Post::with('user')
+                ->orderBy('id', 'desc')
+                ->skip($offset)
+                ->take(self::POSTS_PER_LOAD)
+                ->get();
         }
-
-        return view('home', compact('posts'));
     }
     public function store(Request $request)
     {

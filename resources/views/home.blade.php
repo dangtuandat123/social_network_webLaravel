@@ -281,7 +281,7 @@
         white-space: pre-line;
         word-wrap: break-word;
         overflow-wrap: break-word;
-        word-break: break-all;
+        word-break: break-word;
     }
     
     .see-more-btn {
@@ -688,23 +688,11 @@
         {{-- Posts --}}
         @forelse($posts as $post)
             @if($post)
-            <article class="post-card" data-feed-id="{{ $post->feed_id ?? '' }}" data-post-id="{{ $post->id }}">
-                {{-- Category Badge on Top --}}
-                @if($post->category)
-                    @php
-                        $categoryColors = [
-                            'Giáo dục' => 'background: linear-gradient(135deg, #10B981, #14B8A6);',
-                            'Chính trị' => 'background: linear-gradient(135deg, #6366F1, #8B5CF6);',
-                            'Y tế' => 'background: linear-gradient(135deg, #EF4444, #EC4899);',
-                            'Khác' => 'background: linear-gradient(135deg, #F59E0B, #F97316);',
-                        ];
-                        $bgStyle = $categoryColors[$post->category] ?? 'background: #64748B;';
-                        $lessonText = $post->lesson_number ? ' - Bài ' . $post->lesson_number : '';
-                    @endphp
-                    <div style="padding: 0.5rem 1rem; {{ $bgStyle }} color: white; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; gap: 0.35rem;">
-                        <i class="ri-folder-line"></i> {{ $post->category }}{{ $lessonText }}
-                    </div>
-                @endif
+            @php
+                // Tạo unique ID để tránh trùng khi cùng post xuất hiện nhiều lần
+                $uniqueId = $post->feed_id ?? ($post->id . '-' . $loop->index);
+            @endphp
+            <article class="post-card" data-feed-id="{{ $post->feed_id ?? '' }}" data-post-id="{{ $post->id }}" data-unique-id="{{ $uniqueId }}">
                 
                 <div class="post-header">
                     @if($post->user && $post->user->avatar)
@@ -738,13 +726,13 @@
                     @if($post->content)
                         @php $contentLength = mb_strlen($post->content); @endphp
                         @if($contentLength > 200)
-                            <p class="post-text" id="content-short-{{ $post->id }}">
+                            <p class="post-text" id="content-short-{{ $uniqueId }}">
                                 {{ Str::limit($post->content, 200) }}
-                                <a href="javascript:void(0)" class="see-more-btn" onclick="toggleContent({{ $post->id }})">Xem thêm</a>
+                                <a href="javascript:void(0)" class="see-more-btn" onclick="toggleContent('{{ $uniqueId }}')">Xem thêm</a>
                             </p>
-                            <p class="post-text" id="content-full-{{ $post->id }}" style="display: none;">
+                            <p class="post-text" id="content-full-{{ $uniqueId }}" style="display: none;">
                                 {{ $post->content }}
-                                <a href="javascript:void(0)" class="see-more-btn" onclick="toggleContent({{ $post->id }})">Thu gọn</a>
+                                <a href="javascript:void(0)" class="see-more-btn" onclick="toggleContent('{{ $uniqueId }}')">Thu gọn</a>
                             </p>
                         @else
                             <p class="post-text">{{ $post->content }}</p>
@@ -759,7 +747,7 @@
                             @if(count($images) === 1)
                                 <img src="{{ asset('storage/' . trim($images[0])) }}" alt="" loading="lazy">
                             @else
-                                <div id="carousel-{{ $post->id }}" class="carousel slide" data-bs-ride="false">
+                                <div id="carousel-{{ $uniqueId }}" class="carousel slide" data-bs-ride="false">
                                     <div class="carousel-inner">
                                         @foreach($images as $i => $img)
                                             <div class="carousel-item {{ $i === 0 ? 'active' : '' }}">
@@ -767,8 +755,8 @@
                                             </div>
                                         @endforeach
                                     </div>
-                                    <button class="carousel-control-prev" type="button" data-bs-target="#carousel-{{ $post->id }}" data-bs-slide="prev"><i class="ri-arrow-left-s-line"></i></button>
-                                    <button class="carousel-control-next" type="button" data-bs-target="#carousel-{{ $post->id }}" data-bs-slide="next"><i class="ri-arrow-right-s-line"></i></button>
+                                    <button class="carousel-control-prev" type="button" data-bs-target="#carousel-{{ $uniqueId }}" data-bs-slide="prev"><i class="ri-arrow-left-s-line"></i></button>
+                                    <button class="carousel-control-next" type="button" data-bs-target="#carousel-{{ $uniqueId }}" data-bs-slide="next"><i class="ri-arrow-right-s-line"></i></button>
                                 </div>
                             @endif
                         </div>
@@ -791,7 +779,7 @@
                         <button class="action-btn like-btn {{ auth()->user()->hasLiked($post) ? 'liked' : '' }}" data-post-id="{{ $post->id }}">
                             <i class="{{ auth()->user()->hasLiked($post) ? 'ri-heart-fill' : 'ri-heart-line' }}"></i> Thích
                         </button>
-                        <button class="action-btn" data-bs-toggle="modal" data-bs-target="#shareModal-{{ $post->id }}">
+                        <button class="action-btn" data-bs-toggle="modal" data-bs-target="#shareModal-{{ $uniqueId }}">
                             <i class="ri-share-forward-line"></i> Chia sẻ
                         </button>
                     </div>
@@ -799,21 +787,21 @@
             </article>
             
             @if(Auth::check())
-            <div class="modal fade" id="shareModal-{{ $post->id }}" tabindex="-1">
+            <div class="modal fade" id="shareModal-{{ $uniqueId }}" tabindex="-1">
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
                         <div class="modal-header border-0 pb-0">
                             <h6 class="modal-title fw-semibold">Chia sẻ bài viết</h6>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
-                        <form action="{{ route('share.store', $post->id) }}" method="POST">
+                        <form class="share-form" data-post-id="{{ $post->id }}" data-action="{{ route('share.store', $post->id) }}">
                             @csrf
                             <div class="modal-body py-2">
                                 <textarea name="caption" class="form-control" rows="3" placeholder="Viết gì đó..." required></textarea>
                             </div>
                             <div class="modal-footer border-0 pt-0">
                                 <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Hủy</button>
-                                <button type="submit" class="btn btn-primary btn-sm"><i class="ri-share-forward-line me-1"></i>Chia sẻ</button>
+                                <button type="submit" class="btn btn-primary btn-sm share-submit-btn"><i class="ri-share-forward-line me-1"></i>Chia sẻ</button>
                             </div>
                         </form>
                     </div>
@@ -829,9 +817,22 @@
             </div>
         @endforelse
         
-        @if(method_exists($posts, 'links'))
-            <div class="mt-3">{{ $posts->links('pagination::bootstrap-5') }}</div>
-        @endif
+        {{-- Container để load thêm posts --}}
+        <div id="posts-container"></div>
+        
+        {{-- Loading indicator --}}
+        <div id="loading-indicator" style="display: none; text-align: center; padding: 2rem;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Đang tải...</span>
+            </div>
+            <p class="mt-2 text-muted">Đang tải thêm bài viết...</p>
+        </div>
+        
+        {{-- End of posts message --}}
+        <div id="no-more-posts" style="display: none; text-align: center; padding: 2rem; color: #64748B;">
+            <i class="ri-check-double-line" style="font-size: 2rem;"></i>
+            <p class="mt-2">Bạn đã xem hết tất cả bài viết!</p>
+        </div>
     </main>
     
     {{-- Right Sidebar --}}
@@ -982,12 +983,19 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Like
-    document.querySelectorAll('.like-btn').forEach(btn => {
+    // Like - với loading state để tránh bấm nhiều lần
+    document.querySelectorAll('.like-btn:not([data-init])').forEach(btn => {
+        btn.setAttribute('data-init', 'true');
         btn.addEventListener('click', function() {
+            if (this.disabled) return; // Đang xử lý
+            
             const postId = this.dataset.postId;
             const icon = this.querySelector('i');
             const self = this;
+            
+            // Disable button khi đang xử lý
+            self.disabled = true;
+            self.style.opacity = '0.6';
             
             fetch('/like/' + postId, {
                 method: 'POST',
@@ -1005,6 +1013,70 @@ document.addEventListener('DOMContentLoaded', function() {
                     self.classList.remove('liked');
                     icon.className = 'ri-heart-line';
                 }
+            })
+            .finally(() => {
+                // Enable lại button
+                self.disabled = false;
+                self.style.opacity = '1';
+            });
+        });
+    });
+    
+    // Share - AJAX không reload trang
+    document.querySelectorAll('.share-form:not([data-init])').forEach(form => {
+        form.setAttribute('data-init', 'true');
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const postId = this.dataset.postId;
+            const action = this.dataset.action;
+            const captionInput = this.querySelector('textarea[name="caption"]');
+            const submitBtn = this.querySelector('.share-submit-btn');
+            const modal = this.closest('.modal');
+            
+            if (!captionInput.value.trim()) {
+                alert('Vui lòng nhập caption!');
+                return;
+            }
+            
+            // Disable button
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="ri-loader-4-line me-1"></i>Đang chia sẻ...';
+            
+            const formData = new FormData();
+            formData.append('caption', captionInput.value);
+            formData.append('_token', document.querySelector('meta[name="csrf-token"]').content);
+            
+            fetch(action, {
+                method: 'POST',
+                body: formData
+            })
+            .then(r => {
+                if (r.ok || r.redirected) {
+                    // Thành công - đóng modal và hiện thông báo
+                    if (modal) {
+                        const bsModal = bootstrap.Modal.getInstance(modal);
+                        if (bsModal) bsModal.hide();
+                    }
+                    captionInput.value = '';
+                    
+                    // Hiện thông báo thành công
+                    const toast = document.createElement('div');
+                    toast.className = 'alert alert-success position-fixed';
+                    toast.style.cssText = 'top: 100px; right: 20px; z-index: 9999; animation: fadeIn 0.3s;';
+                    toast.innerHTML = '<i class="ri-check-line me-2"></i>Chia sẻ thành công!';
+                    document.body.appendChild(toast);
+                    setTimeout(() => toast.remove(), 3000);
+                } else {
+                    throw new Error('Share failed');
+                }
+            })
+            .catch(err => {
+                alert('Không thể chia sẻ. Vui lòng thử lại!');
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="ri-share-forward-line me-1"></i>Chia sẻ';
             });
         });
     });
@@ -1197,6 +1269,118 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.post-card[data-feed-id]').forEach(c => {
         if (c.dataset.feedId) observer.observe(c);
     });
+    @endif
+    
+    // ============================================================
+    // INFINITE SCROLL
+    // ============================================================
+    let nextOffset = {{ $posts->count() }};
+    let isLoading = false;
+    let hasMore = true;
+    
+    const postsContainer = document.getElementById('posts-container');
+    const loadingIndicator = document.getElementById('loading-indicator');
+    const noMorePosts = document.getElementById('no-more-posts');
+    
+    function loadMorePosts() {
+        if (isLoading || !hasMore) return;
+        
+        isLoading = true;
+        loadingIndicator.style.display = 'block';
+        
+        fetch('/load-more?offset=' + nextOffset)
+            .then(response => response.json())
+            .then(data => {
+                if (data.html && data.html.trim() !== '') {
+                    postsContainer.insertAdjacentHTML('beforeend', data.html);
+                    nextOffset = data.nextOffset;
+                    hasMore = data.hasMore;
+                    
+                    // Re-init like buttons cho posts mới
+                    initLikeButtons();
+                    
+                    // Re-init video observer cho videos mới
+                    initVideoObserver();
+                    
+                    // Re-init feed tracking cho posts mới
+                    @if(Auth::check())
+                    initFeedTracking();
+                    @endif
+                }
+                
+                if (!hasMore) {
+                    noMorePosts.style.display = 'block';
+                }
+                
+                isLoading = false;
+                loadingIndicator.style.display = 'none';
+            })
+            .catch(err => {
+                console.error('Load more error:', err);
+                isLoading = false;
+                loadingIndicator.style.display = 'none';
+            });
+    }
+    
+    // Trigger khi cuộn gần cuối trang (300px trước khi hết)
+    window.addEventListener('scroll', function() {
+        if ((window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 300)) {
+            loadMorePosts();
+        }
+    });
+    
+    // Hàm init like buttons
+    function initLikeButtons() {
+        document.querySelectorAll('.like-btn:not([data-init])').forEach(btn => {
+            btn.setAttribute('data-init', 'true');
+            btn.addEventListener('click', function() {
+                const postId = this.dataset.postId;
+                const icon = this.querySelector('i');
+                const self = this;
+                
+                fetch('/like/' + postId, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(r => r.json())
+                .then(d => {
+                    if (d.status === 'liked') {
+                        self.classList.add('liked');
+                        icon.className = 'ri-heart-fill';
+                    } else {
+                        self.classList.remove('liked');
+                        icon.className = 'ri-heart-line';
+                    }
+                });
+            });
+        });
+    }
+    
+    // Hàm init video observer
+    function initVideoObserver() {
+        document.querySelectorAll('.post-media video:not([data-init])').forEach(video => {
+            video.setAttribute('data-init', 'true');
+            video.muted = true;
+            videoObserver.observe(video);
+            video.addEventListener('click', function() {
+                this.muted = !this.muted;
+            });
+        });
+    }
+    
+    @if(Auth::check())
+    // Hàm init feed tracking
+    function initFeedTracking() {
+        document.querySelectorAll('.post-card[data-feed-id]:not([data-track-init])').forEach(c => {
+            if (c.dataset.feedId) {
+                c.setAttribute('data-track-init', 'true');
+                observer.observe(c);
+            }
+        });
+    }
     @endif
 });
 </script>
